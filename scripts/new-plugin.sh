@@ -989,20 +989,91 @@ sed -i '' "/go test .\/libs\/plugin-transport-stdio/a\\
 ok "Makefile updated"
 
 # ──────────────────────────────────────────────────────
-# Update sync-repos.sh and release.sh
+# Generate orchestra.json for the plugin
 # ──────────────────────────────────────────────────────
 
-info "Adding to sync-repos.sh..."
-sed -i '' '/^  "cli|libs\/cli"/a\
-  "plugin-'"${NAME}"'|libs/plugin-'"${NAME}"'"
-' "${ROOT}/scripts/sync-repos.sh"
-ok "sync-repos.sh updated"
+info "Generating orchestra.json..."
+cat > "${PLUGIN_DIR}/orchestra.json" <<OJEOF
+{
+    "name": "${ORG}/plugin-${NAME}",
+    "description": "${NAME} ${TYPE} plugin for Orchestra MCP.",
+    "type": "${TYPE}",
+    "license": "MIT",
+    "homepage": "https://orchestra-mcp.dev",
+    "support": {
+        "issues": "https://github.com/${ORG}/plugin-${NAME}/issues",
+        "source": "https://github.com/${ORG}/plugin-${NAME}"
+    },
+    "require": {
+        "${ORG}/gen-go": "^0.1.0",
+        "${ORG}/sdk-go": "^0.1.0"
+    },
+    "bin": "${BINARY}",
+    "extra": {
+        "plugin-id": "${PLUGIN_ID}",
+        "provides": ["${TYPE}"],
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    }
+}
+OJEOF
+ok "orchestra.json created"
 
-info "Adding to release.sh..."
-sed -i '' '/^  "cli|/a\
-  "plugin-'"${NAME}"'|'"${NAME}"' plugin for Orchestra MCP."
-' "${ROOT}/scripts/release.sh"
-ok "release.sh updated"
+# ──────────────────────────────────────────────────────
+# Update root orchestra.json and orchestra.lock
+# ──────────────────────────────────────────────────────
+
+info "Adding to orchestra.json and orchestra.lock..."
+python3 -c "
+import json
+
+# Update orchestra.json — add to require
+with open('${ROOT}/orchestra.json') as f:
+    manifest = json.load(f)
+manifest['require']['${ORG}/plugin-${NAME}'] = '^0.1.0'
+order = manifest.get('extra', {}).get('install-order', [])
+if 'plugin-${NAME}' not in order:
+    # Insert before 'cli' (last item) if it exists, otherwise append
+    if 'cli' in order:
+        idx = order.index('cli')
+        order.insert(idx, 'plugin-${NAME}')
+    else:
+        order.append('plugin-${NAME}')
+    manifest.setdefault('extra', {})['install-order'] = order
+with open('${ROOT}/orchestra.json', 'w') as f:
+    json.dump(manifest, f, indent=4)
+    f.write('\n')
+
+# Update orchestra.lock — add to packages
+with open('${ROOT}/orchestra.lock') as f:
+    lock = json.load(f)
+new_pkg = {
+    'name': '${ORG}/plugin-${NAME}',
+    'version': 'v0.1.0',
+    'source': {
+        'type': 'git',
+        'url': 'https://github.com/${ORG}/plugin-${NAME}.git',
+        'reference': 'master'
+    },
+    'type': '${TYPE}',
+    'description': '${NAME} ${TYPE} plugin for Orchestra MCP.',
+    'path': 'libs/plugin-${NAME}',
+    'binary': '${BINARY}',
+    'require': {
+        '${ORG}/gen-go': '^0.1.0',
+        '${ORG}/sdk-go': '^0.1.0'
+    }
+}
+# Insert before cli (last) if possible
+pkgs = lock['packages']
+cli_idx = next((i for i, p in enumerate(pkgs) if p['name'].endswith('/cli')), len(pkgs))
+pkgs.insert(cli_idx, new_pkg)
+with open('${ROOT}/orchestra.lock', 'w') as f:
+    json.dump(lock, f, indent=4)
+    f.write('\n')
+"
+ok "orchestra.json and orchestra.lock updated"
 
 # ──────────────────────────────────────────────────────
 # Run go mod tidy

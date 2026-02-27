@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # release.sh — Sync libs/ to GitHub repos, then tag + create GitHub releases.
+# Reads package list from orchestra.lock (single source of truth).
 #
 # Usage:
 #   ./scripts/release.sh v0.2.0                          # Release all repos at v0.2.0
@@ -11,32 +12,24 @@
 
 set -euo pipefail
 
-ORG="orchestra-mcp"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOCK_FILE="${ROOT}/orchestra.lock"
 BRANCH="master"
 DRY_RUN=false
 FORCE=false
 SYNC_ONLY=false
 SKIP_SYNC=false
 
-# Dependency order — release base packages first so dependents can resolve them
-# Format: "name|release_note"
-ALL_REPOS=(
-  "proto|Protobuf contract definitions for the Orchestra MCP plugin host protocol."
-  "gen-go|Generated Go code from Orchestra MCP Protobuf definitions."
-  "sdk-go|Go SDK for building Orchestra MCP plugins (QUIC transport, mTLS, Protobuf framing)."
-  "orchestrator|Plugin host orchestrator with QUIC mesh, message routing, and lifecycle management."
-  "plugin-storage-markdown|Markdown storage plugin with YAML frontmatter metadata."
-  "plugin-tools-features|Feature-driven project management tools (workflow, dependencies, WIP limits, reviews)."
-  "plugin-transport-stdio|MCP stdio transport plugin (JSON-RPC over stdin/stdout)."
-  "cli|Orchestra CLI for installing and managing plugins."
-)
-
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 info()    { printf "${CYAN}[release]${NC} %s\n" "$*"; }
 ok()      { printf "${GREEN}[ok]${NC}      %s\n" "$*"; }
 warn()    { printf "${YELLOW}[skip]${NC}    %s\n" "$*"; }
 fail()    { printf "${RED}[fail]${NC}    %s\n" "$*" >&2; }
+
+if [[ ! -f "$LOCK_FILE" ]]; then
+  fail "orchestra.lock not found at ${LOCK_FILE}"
+  exit 1
+fi
 
 # Parse args
 VERSION=""
@@ -56,11 +49,13 @@ while [[ $# -gt 0 ]]; do
       echo "  --sync-only   Sync code only, skip tagging"
       echo "  --skip-sync   Skip sync, tag/release only"
       echo ""
-      echo "Repos:"
-      for entry in "${ALL_REPOS[@]}"; do
-        IFS='|' read -r name _ <<< "$entry"
-        echo "  $name"
-      done
+      echo "Packages (from orchestra.lock):"
+      python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    name = pkg['name'].split('/')[-1]
+    print(f'  {name:35s} {pkg[\"description\"][:60]}')"
       exit 0
       ;;
     v*)  VERSION="$1"; shift ;;
@@ -80,34 +75,48 @@ if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 
-# Build target list (names only for filtering, full entries for release notes)
-TARGETS=()
+# Read packages from orchestra.lock (one per line: name|url|description)
+PKGLIST="$(mktemp)"
+python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+org = lock['packages'][0]['name'].split('/')[0]
+for pkg in lock['packages']:
+    name = pkg['name'].split('/')[-1]
+    url = pkg['source']['url'].replace('.git', '')
+    desc = pkg['description']
+    print(f'{name}|{org}/{name}|{desc}')
+" > "$PKGLIST"
+
+# Build target list
+TARGETLIST="$(mktemp)"
 if [[ ${#FILTER[@]} -gt 0 ]]; then
   for filter in "${FILTER[@]}"; do
-    found=false
-    for entry in "${ALL_REPOS[@]}"; do
-      IFS='|' read -r name note <<< "$entry"
-      if [[ "$name" == "$filter" ]]; then
-        TARGETS+=("$entry")
-        found=true
-        break
-      fi
-    done
-    if ! $found; then
-      fail "Unknown repo: $filter"
+    match="$(grep "^${filter}|" "$PKGLIST" || true)"
+    if [[ -z "$match" ]]; then
+      fail "Unknown package: ${filter}"
+      echo ""
+      echo "Available packages:"
+      cut -d'|' -f1 "$PKGLIST" | sed 's/^/  /'
+      rm -f "$PKGLIST" "$TARGETLIST"
       exit 1
     fi
+    echo "$match" >> "$TARGETLIST"
   done
 else
-  TARGETS=("${ALL_REPOS[@]}")
+  cp "$PKGLIST" "$TARGETLIST"
 fi
 
+rm -f "$PKGLIST"
+
 # Preflight
-command -v gh &>/dev/null || { fail "gh CLI not found"; exit 1; }
-command -v git &>/dev/null || { fail "git not found"; exit 1; }
+command -v gh &>/dev/null || { fail "gh CLI not found"; rm -f "$TARGETLIST"; exit 1; }
+command -v git &>/dev/null || { fail "git not found"; rm -f "$TARGETLIST"; exit 1; }
+
+count="$(wc -l < "$TARGETLIST" | tr -d ' ')"
 
 echo ""
-info "Release ${VERSION} for ${#TARGETS[@]} repo(s)"
+info "Release ${VERSION} for ${count} package(s)"
 $DRY_RUN && warn "DRY RUN — no changes will be pushed"
 echo ""
 
@@ -121,10 +130,9 @@ if ! $SKIP_SYNC; then
 
   # Extract just the names for sync script
   SYNC_NAMES=()
-  for entry in "${TARGETS[@]}"; do
-    IFS='|' read -r name _ <<< "$entry"
+  while IFS='|' read -r name _ _; do
     SYNC_NAMES+=("$name")
-  done
+  done < "$TARGETLIST"
 
   SYNC_ARGS=()
   $DRY_RUN && SYNC_ARGS+=(--dry-run)
@@ -139,6 +147,7 @@ else
 fi
 
 if $SYNC_ONLY; then
+  rm -f "$TARGETLIST"
   ok "Sync complete (--sync-only, skipping tags)"
   exit 0
 fi
@@ -152,9 +161,8 @@ echo ""
 
 RELEASED=0; SKIPPED=0; ERRORS=0
 
-for entry in "${TARGETS[@]}"; do
-  IFS='|' read -r name note <<< "$entry"
-  repo="${ORG}/${name}"
+while IFS='|' read -r name repo desc; do
+  [[ -z "$name" ]] && continue
 
   # Check if release already exists
   if gh release view "${VERSION}" --repo "${repo}" &>/dev/null 2>&1; then
@@ -163,7 +171,6 @@ for entry in "${TARGETS[@]}"; do
       if ! $DRY_RUN; then
         gh release delete "${VERSION}" --repo "${repo}" --yes 2>/dev/null || true
         gh api -X DELETE "repos/${repo}/git/refs/tags/${VERSION}" 2>/dev/null || true
-        # Small delay to let GitHub process the deletion
         sleep 1
       fi
     else
@@ -183,7 +190,7 @@ for entry in "${TARGETS[@]}"; do
   if gh release create "${VERSION}" \
     --repo "${repo}" \
     --title "${VERSION}" \
-    --notes "${note}" \
+    --notes "${desc}" \
     --target "${BRANCH}" 2>/dev/null; then
     ok "${name}: https://github.com/${repo}/releases/tag/${VERSION}"
     RELEASED=$((RELEASED + 1))
@@ -191,7 +198,27 @@ for entry in "${TARGETS[@]}"; do
     fail "${name}: release creation failed"
     ERRORS=$((ERRORS + 1))
   fi
-done
+done < "$TARGETLIST"
+
+rm -f "$TARGETLIST"
+
+# ──────────────────────────────────────────────────────
+# Step 3: Update orchestra.lock with new version
+# ──────────────────────────────────────────────────────
+
+if [[ $RELEASED -gt 0 ]] && ! $DRY_RUN; then
+  info "Step 3: Updating orchestra.lock to ${VERSION}..."
+  python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    pkg['version'] = '${VERSION}'
+with open('${LOCK_FILE}', 'w') as f:
+    json.dump(lock, f, indent=4)
+    f.write('\n')
+"
+  ok "orchestra.lock updated to ${VERSION}"
+fi
 
 # ──────────────────────────────────────────────────────
 # Summary
@@ -202,9 +229,10 @@ echo "────────────────────────�
 ok "Released: ${RELEASED}  Skipped: ${SKIPPED}  Failed: ${ERRORS}"
 
 if [[ $RELEASED -gt 0 ]] && ! $DRY_RUN; then
+  org="$(python3 -c "import json; print(json.load(open('${LOCK_FILE}'))['packages'][0]['name'].split('/')[0])")"
   echo ""
   info "Go module proxy will index tags within a few minutes."
-  info "Verify: GOWORK=off go list -m github.com/${ORG}/sdk-go@${VERSION}"
+  info "Verify: GOWORK=off go list -m github.com/${org}/sdk-go@${VERSION}"
 fi
 
 [[ $ERRORS -gt 0 ]] && exit 1

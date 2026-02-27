@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # sync-repos.sh — Push local libs/ changes to individual GitHub repos.
+# Reads package list from orchestra.lock (single source of truth).
 #
 # Usage:
 #   ./scripts/sync-repos.sh                    # Sync all repos
@@ -9,30 +10,22 @@
 
 set -euo pipefail
 
-ORG="orchestra-mcp"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOCK_FILE="${ROOT}/orchestra.lock"
 BRANCH="master"
 DRY_RUN=false
 MSG=""
-
-# Dependency order — push base packages first
-# Format: "name|source_dir"
-ALL_REPOS=(
-  "proto|libs/proto"
-  "gen-go|libs/gen-go"
-  "sdk-go|libs/sdk-go"
-  "orchestrator|libs/orchestrator"
-  "plugin-storage-markdown|libs/plugin-storage-markdown"
-  "plugin-tools-features|libs/plugin-tools-features"
-  "plugin-transport-stdio|libs/plugin-transport-stdio"
-  "cli|libs/cli"
-)
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 info()    { printf "${CYAN}[sync]${NC}  %s\n" "$*"; }
 ok()      { printf "${GREEN}[ok]${NC}    %s\n" "$*"; }
 warn()    { printf "${YELLOW}[skip]${NC}  %s\n" "$*"; }
 fail()    { printf "${RED}[fail]${NC}  %s\n" "$*" >&2; }
+
+if [[ ! -f "$LOCK_FILE" ]]; then
+  fail "orchestra.lock not found at ${LOCK_FILE}"
+  exit 1
+fi
 
 # Parse args
 FILTER=()
@@ -43,11 +36,13 @@ while [[ $# -gt 0 ]]; do
     --help|-h)
       echo "Usage: $0 [--dry-run] [--message \"msg\"] [repo ...]"
       echo ""
-      echo "Repos:"
-      for entry in "${ALL_REPOS[@]}"; do
-        IFS='|' read -r name _ <<< "$entry"
-        echo "  $name"
-      done
+      echo "Packages (from orchestra.lock):"
+      python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    name = pkg['name'].split('/')[-1]
+    print(f'  {name:35s} {pkg[\"path\"]}')"
       exit 0
       ;;
     -*) fail "Unknown flag: $1"; exit 1 ;;
@@ -55,47 +50,60 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Read packages from orchestra.lock into temp file (one per line: name|path|url)
+PKGLIST="$(mktemp)"
+python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    name = pkg['name'].split('/')[-1]
+    path = pkg['path']
+    url = pkg['source']['url']
+    print(f'{name}|{path}|{url}')
+" > "$PKGLIST"
+
 # Build target list
-TARGETS=()
+TARGETLIST="$(mktemp)"
 if [[ ${#FILTER[@]} -gt 0 ]]; then
   for filter in "${FILTER[@]}"; do
-    found=false
-    for entry in "${ALL_REPOS[@]}"; do
-      IFS='|' read -r name srcdir <<< "$entry"
-      if [[ "$name" == "$filter" ]]; then
-        TARGETS+=("$entry")
-        found=true
-        break
-      fi
-    done
-    if ! $found; then
-      fail "Unknown repo: $filter"
+    match="$(grep "^${filter}|" "$PKGLIST" || true)"
+    if [[ -z "$match" ]]; then
+      fail "Unknown package: ${filter}"
+      echo ""
+      echo "Available packages:"
+      cut -d'|' -f1 "$PKGLIST" | sed 's/^/  /'
+      rm -f "$PKGLIST" "$TARGETLIST"
       exit 1
     fi
+    echo "$match" >> "$TARGETLIST"
   done
 else
-  TARGETS=("${ALL_REPOS[@]}")
+  cp "$PKGLIST" "$TARGETLIST"
 fi
 
+rm -f "$PKGLIST"
+
 # Preflight
-command -v gh &>/dev/null || { fail "gh CLI not found"; exit 1; }
-command -v git &>/dev/null || { fail "git not found"; exit 1; }
+command -v gh &>/dev/null || { fail "gh CLI not found"; rm -f "$TARGETLIST"; exit 1; }
+command -v git &>/dev/null || { fail "git not found"; rm -f "$TARGETLIST"; exit 1; }
 
 TIMESTAMP="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 COMMIT_MSG="${MSG:-Sync from monorepo (${TIMESTAMP})}"
 
-info "Syncing ${#TARGETS[@]} repo(s) to ${ORG}/"
+count="$(wc -l < "$TARGETLIST" | tr -d ' ')"
+info "Syncing ${count} package(s)"
 $DRY_RUN && warn "DRY RUN — no changes will be pushed"
 echo ""
 
 SYNCED=0; UNCHANGED=0; ERRORS=0
 
-for entry in "${TARGETS[@]}"; do
-  IFS='|' read -r name srcdir <<< "$entry"
-  src="${ROOT}/${srcdir}"
+while IFS='|' read -r name path url; do
+  [[ -z "$name" ]] && continue
+
+  src="${ROOT}/${path}"
 
   if [[ ! -d "$src" ]]; then
-    fail "${name}: source dir not found (${srcdir}/)"
+    fail "${name}: source dir not found (${path}/)"
     ERRORS=$((ERRORS + 1))
     continue
   fi
@@ -103,8 +111,8 @@ for entry in "${TARGETS[@]}"; do
   # Clone into temp dir
   tmp="$(mktemp -d)"
 
-  if ! git clone --quiet --branch "${BRANCH}" "https://github.com/${ORG}/${name}.git" "${tmp}/repo" 2>/dev/null; then
-    fail "${name}: clone failed"
+  if ! git clone --quiet --branch "${BRANCH}" "${url}" "${tmp}/repo" 2>/dev/null; then
+    fail "${name}: clone failed (${url})"
     rm -rf "$tmp"
     ERRORS=$((ERRORS + 1))
     continue
@@ -138,7 +146,9 @@ for entry in "${TARGETS[@]}"; do
 
   cd "${ROOT}"
   rm -rf "$tmp"
-done
+done < "$TARGETLIST"
+
+rm -f "$TARGETLIST"
 
 # Summary
 echo ""

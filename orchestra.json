@@ -1,0 +1,45 @@
+{
+    "name": "orchestra-mcp/framework",
+    "description": "Orchestra MCP \u2014 AI-agentic plugin host framework with QUIC mesh, mTLS, and Protobuf.",
+    "type": "framework",
+    "license": "MIT",
+    "homepage": "https://orchestra-mcp.dev",
+    "support": {
+        "issues": "https://github.com/orchestra-mcp/framework/issues",
+        "source": "https://github.com/orchestra-mcp/framework"
+    },
+    "authors": [
+        {
+            "name": "Orchestra MCP",
+            "homepage": "https://orchestra-mcp.dev"
+        }
+    ],
+    "require": {
+        "orchestra-mcp/proto": "^0.1.0",
+        "orchestra-mcp/gen-go": "^0.1.0",
+        "orchestra-mcp/sdk-go": "^0.1.0",
+        "orchestra-mcp/orchestrator": "^0.1.0",
+        "orchestra-mcp/plugin-storage-markdown": "^0.1.0",
+        "orchestra-mcp/plugin-tools-features": "^0.1.0",
+        "orchestra-mcp/plugin-transport-stdio": "^0.1.0",
+        "orchestra-mcp/cli": "^0.1.0"
+    },
+    "config": {
+        "org": "orchestra-mcp",
+        "libs-dir": "libs",
+        "bin-dir": "bin",
+        "branch": "master"
+    },
+    "extra": {
+        "install-order": [
+            "proto",
+            "gen-go",
+            "sdk-go",
+            "orchestrator",
+            "plugin-storage-markdown",
+            "plugin-tools-features",
+            "plugin-transport-stdio",
+            "cli"
+        ]
+    }
+}

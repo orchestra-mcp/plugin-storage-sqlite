@@ -32,6 +32,18 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install dependencies
+        run: |
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              url = pkg['source']['url']
+              path = pkg['path']
+              version = pkg['version']
+              print(f'git clone --depth 1 --branch {version} {url} {path}')
+          " | sh
+
       - name: Build all binaries
         env:
           GOOS: ${{ matrix.goos }}
@@ -85,10 +97,30 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
+
+      - name: Install dependencies
+        run: |
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              url = pkg['source']['url']
+              path = pkg['path']
+              version = pkg['version']
+              print(f'git clone --depth 1 --branch {version} {url} {path}')
+          " | sh
+
       - name: Run unit tests
         run: |
-          go test ./libs/sdk-go/... -v
-          go test ./libs/orchestrator/... -v
-          go test ./libs/plugin-storage-markdown/... -v
-          go test ./libs/plugin-tools-features/... -v
-          go test ./libs/plugin-transport-stdio/... -v
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              if pkg['type'] not in ('proto', 'lib', 'cli'):
+                  print(pkg['path'])
+              elif pkg['type'] == 'lib':
+                  print(pkg['path'])
+          " | while read path; do
+            echo "go test ./${path}/... -v"
+            go test "./${path}/..." -v
+          done

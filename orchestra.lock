@@ -1,0 +1,136 @@
+{
+    "_readme": [
+        "This file locks the dependencies to known versions.",
+        "Read more about it at https://orchestra-mcp.dev/docs/lock-file"
+    ],
+    "content-hash": "auto-generated",
+    "packages": [
+        {
+            "name": "orchestra-mcp/proto",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/proto.git",
+                "reference": "master"
+            },
+            "type": "proto",
+            "description": "Protobuf contract definitions for the Orchestra MCP plugin host protocol.",
+            "path": "libs/proto",
+            "require": {}
+        },
+        {
+            "name": "orchestra-mcp/gen-go",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/gen-go.git",
+                "reference": "master"
+            },
+            "type": "lib",
+            "description": "Generated Go code from Orchestra MCP Protobuf definitions.",
+            "path": "libs/gen-go",
+            "binary": null,
+            "require": {
+                "orchestra-mcp/proto": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/sdk-go",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/sdk-go.git",
+                "reference": "master"
+            },
+            "type": "lib",
+            "description": "Go SDK for building Orchestra MCP plugins (QUIC transport, mTLS, Protobuf framing).",
+            "path": "libs/sdk-go",
+            "binary": null,
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/orchestrator",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/orchestrator.git",
+                "reference": "master"
+            },
+            "type": "service",
+            "description": "Plugin host orchestrator with QUIC mesh, message routing, and lifecycle management.",
+            "path": "libs/orchestrator",
+            "binary": "orchestrator",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-storage-markdown",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-storage-markdown.git",
+                "reference": "master"
+            },
+            "type": "plugin",
+            "description": "Markdown storage plugin with YAML frontmatter metadata.",
+            "path": "libs/plugin-storage-markdown",
+            "binary": "storage-markdown",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-features",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-features.git",
+                "reference": "master"
+            },
+            "type": "plugin",
+            "description": "Feature-driven project management tools (workflow, dependencies, WIP limits, reviews).",
+            "path": "libs/plugin-tools-features",
+            "binary": "tools-features",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-transport-stdio",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-transport-stdio.git",
+                "reference": "master"
+            },
+            "type": "plugin",
+            "description": "MCP stdio transport plugin (JSON-RPC over stdin/stdout).",
+            "path": "libs/plugin-transport-stdio",
+            "binary": "transport-stdio",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/cli",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/cli.git",
+                "reference": "master"
+            },
+            "type": "cli",
+            "description": "Orchestra CLI for installing and managing plugins.",
+            "path": "libs/cli",
+            "binary": "orchestra",
+            "require": {}
+        }
+    ]
+}

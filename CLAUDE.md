@@ -174,6 +174,7 @@ Every skill is both auto-activated by context AND available as a `/command`. Use
 | `/project-manager` | Process | Sprint planning, feature breakdown, ADRs, cross-team coordination |
 | `/docs` | Documentation | Architecture, plugin system, API references, package relationships |
 | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |
+| `/plugin-generator` | Plugin scaffolding | new-plugin.sh, tools/storage/transport templates, SDK patterns |
 
 ## Agents
 

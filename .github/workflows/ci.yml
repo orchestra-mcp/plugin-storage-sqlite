@@ -15,6 +15,18 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install dependencies
+        run: |
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              url = pkg['source']['url']
+              path = pkg['path']
+              version = pkg['version']
+              print(f'git clone --depth 1 --branch {version} {url} {path}')
+          " | sh
+
       - name: Build all binaries
         run: make build
 
@@ -32,11 +44,27 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install dependencies
+        run: |
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              url = pkg['source']['url']
+              path = pkg['path']
+              version = pkg['version']
+              print(f'git clone --depth 1 --branch {version} {url} {path}')
+          " | sh
+
       - name: Vet
         run: |
-          go vet ./libs/cli/...
-          go vet ./libs/sdk-go/...
-          go vet ./libs/orchestrator/...
-          go vet ./libs/plugin-storage-markdown/...
-          go vet ./libs/plugin-tools-features/...
-          go vet ./libs/plugin-transport-stdio/...
+          python3 -c "
+          import json
+          lock = json.load(open('orchestra.lock'))
+          for pkg in lock['packages']:
+              if pkg['type'] != 'proto':
+                  print(pkg['path'])
+          " | while read path; do
+            echo "go vet ./${path}/..."
+            go vet "./${path}/..."
+          done
