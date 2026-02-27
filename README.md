@@ -8,12 +8,6 @@ An AI-agentic IDE framework built on a plugin host architecture. Every capabilit
 # macOS / Linux — one-line install
 curl -fsSL https://raw.githubusercontent.com/orchestra-mcp/framework/master/scripts/install.sh | sh
 
-# Homebrew
-brew install orchestra-mcp/tap/orchestra
-
-# npm
-npx @orchestra-mcp/cli init
-
 # From source
 git clone https://github.com/orchestra-mcp/framework.git
 cd framework && make install
@@ -26,7 +20,7 @@ cd framework && make install
 cd your-project
 orchestra init
 
-# 2. That's it — your AI IDE now has 36 project management tools
+# 2. That's it — your AI IDE now has 49 tools + 5 prompts
 ```
 
 `orchestra init` detects your IDE and writes the correct MCP config. Supported IDEs:
@@ -63,7 +57,10 @@ transport.stdio
 orchestrator ──────────────────┐
   │ QUIC + Protobuf            │ QUIC + Protobuf
   ▼                            ▼
-tools.features (36 tools)    storage.markdown (disk)
+tools.features (34 tools)    storage.markdown (disk)
+  │ QUIC + Protobuf
+  ▼
+tools.marketplace (15 tools, 5 prompts)
 ```
 
 **Star topology** — the orchestrator is the only router. Plugins never talk directly to each other. Any language that speaks QUIC + Protobuf can be a plugin.
@@ -71,10 +68,14 @@ tools.features (36 tools)    storage.markdown (disk)
 ## CLI Commands
 
 ```bash
-orchestra init      # Initialize MCP configs for your IDE(s)
-orchestra serve     # Start the MCP stdio server (used by IDE configs automatically)
-orchestra version   # Print version info
-orchestra help      # Show usage
+orchestra init                          # Initialize MCP configs for your IDE(s)
+orchestra serve                         # Start the MCP stdio server
+orchestra version                       # Print version info
+orchestra pack install <repo>[@ver]     # Install a pack of skills/agents/hooks
+orchestra pack remove <name>            # Remove an installed pack
+orchestra pack list                     # List installed packs
+orchestra pack search <query>           # Search available packs
+orchestra pack recommend                # Recommend packs for your project
 ```
 
 ### `orchestra init`
@@ -97,15 +98,51 @@ orchestra help      # Show usage
 
 | Binary | Description |
 |--------|-------------|
-| `orchestra` | CLI — init, serve, version |
+| `orchestra` | CLI — init, serve, version, pack management |
 | `orchestrator` | Central hub — starts plugins, routes QUIC messages |
 | `storage-markdown` | File storage with YAML frontmatter metadata + Markdown body |
-| `tools-features` | 36 feature-driven workflow tools |
+| `tools-features` | 34 feature-driven workflow tools |
 | `transport-stdio` | MCP JSON-RPC bridge (stdin/stdout to QUIC) |
+| `tools-marketplace` | 15 pack management tools + 5 prompts |
 
-All 5 binaries are co-located in the same directory. `orchestra serve` finds the other 4 as siblings.
+All 6 binaries are co-located in the same directory. `orchestra serve` finds the other 5 as siblings.
 
-## Feature Workflow (36 Tools)
+## Packs
+
+Packs are installable bundles of skills (slash commands), agents (specialized sub-agents), and hooks (shell scripts). 17 official packs cover common stacks:
+
+| Pack | Stacks | Contents |
+|------|--------|----------|
+| `pack-essentials` | all | project-manager, qa-testing, docs, scrum-master, devops |
+| `pack-go-backend` | go | go-backend skill, go-architect + qa-go agents |
+| `pack-rust-engine` | rust | rust-engine skill, rust-engineer + qa-rust agents |
+| `pack-react-frontend` | react, typescript | typescript-react, ui-design, tailwind skills |
+| `pack-database` | all | database-sync skill, dba + postgres/sqlite/redis agents |
+| `pack-ai` | all | ai-agentic skill, ai-engineer + lancedb agents |
+| `pack-proto` | go, rust | proto-grpc skill, quic-protocol agent |
+| `pack-desktop` | go, swift | wails, macos, native-widgets skills |
+| `pack-mobile` | react | react-native skill, mobile-dev agent |
+| `pack-chrome` | typescript | chrome-extension skill |
+| `pack-infra` | all | gcp-infrastructure skill, devops agent |
+| `pack-extensions` | all | native-extensions, raycast, vscode skills |
+| `pack-analytics` | all | clickhouse-engineer agent |
+| `pack-native-swift` | swift | swift-plugin agent |
+| `pack-native-kotlin` | kotlin | kotlin-plugin agent |
+| `pack-native-csharp` | csharp | csharp-plugin agent |
+| `pack-native-gtk` | c | gtk-plugin agent |
+
+```bash
+# Install a pack
+orchestra pack install github.com/orchestra-mcp/pack-go-backend
+
+# Auto-detect your stacks and get recommendations
+orchestra pack recommend
+
+# Search for packs
+orchestra pack search "react"
+```
+
+## Feature Workflow (34 Tools)
 
 The tools.features plugin implements an 11-state feature lifecycle:
 
@@ -159,19 +196,19 @@ framework/
 │   ├── sdk-go/                        #   Plugin SDK (QUIC, mTLS, framing, helpers)
 │   ├── orchestrator/                  #   Central hub (config, loader, router, server)
 │   ├── plugin-storage-markdown/       #   Markdown storage with YAML frontmatter
-│   ├── plugin-tools-features/         #   36 feature workflow tools
+│   ├── plugin-tools-features/         #   34 feature workflow tools
+│   ├── plugin-tools-marketplace/      #   15 pack management tools + 5 prompts
 │   ├── plugin-transport-stdio/        #   MCP JSON-RPC stdin/stdout bridge
-│   └── cli/                           #   CLI binary (init, serve, version)
+│   └── cli/                           #   CLI binary (init, serve, version, pack)
+├── packs/                             # 17 installable packs (skills, agents, hooks)
 ├── scripts/
 │   ├── install.sh                     # curl | sh installer
 │   ├── new-plugin.sh                  # Plugin generator (tools/storage/transport)
 │   ├── sync-repos.sh                  # Push libs/ to individual GitHub repos
 │   ├── release.sh                     # Sync + tag + create GitHub releases
+│   ├── ship.sh                        # Full ship pipeline (build, test, sync, release)
 │   ├── orchestra-fmt.sh               # Format & validate orchestra.json files
 │   └── test-e2e.sh                    # End-to-end integration test
-├── packaging/
-│   ├── homebrew/orchestra.rb          # Homebrew formula template
-│   └── npm/                           # npm wrapper package
 ├── .github/workflows/
 │   ├── ci.yml                         # CI: build + test + vet on push/PR
 │   └── release.yml                    # Release: cross-compile on tag push
@@ -188,10 +225,10 @@ framework/
 ## Makefile Targets
 
 ```bash
-make build              # Build all 5 binaries to bin/
-make test               # Run all unit tests (62 tests)
+make build              # Build all 6 binaries to bin/
+make test               # Run all unit tests
 make test-e2e           # Build + run end-to-end integration test
-make install            # Install all 5 binaries to /usr/local/bin
+make install            # Install all 6 binaries to /usr/local/bin
 make release            # Cross-compile for darwin/linux × amd64/arm64
 make clean              # Remove build artifacts and certs
 make proto              # Lint + generate proto code

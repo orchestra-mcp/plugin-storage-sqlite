@@ -83,7 +83,7 @@ install() {
     echo "Installing to ${INSTALL_DIR}..."
     mkdir -p "$INSTALL_DIR"
 
-    for bin in orchestra orchestrator storage-markdown tools-features transport-stdio; do
+    for bin in orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace; do
         if [ -f "${TMP_DIR}/${bin}" ]; then
             cp "${TMP_DIR}/${bin}" "${INSTALL_DIR}/${bin}"
             chmod +x "${INSTALL_DIR}/${bin}"
