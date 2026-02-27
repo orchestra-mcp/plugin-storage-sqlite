@@ -1,2 +1,4 @@
+github.com/orchestra-mcp/gen-go v0.0.2-beta/go.mod h1:fagdHdSkffW6X8s+wke3E/F1ZJsMrL19WaQykSs7Vi4=
 github.com/orchestra-mcp/gen-go v0.1.1/go.mod h1:fagdHdSkffW6X8s+wke3E/F1ZJsMrL19WaQykSs7Vi4=
+github.com/orchestra-mcp/sdk-go v0.0.2-beta/go.mod h1:zcAtCX5/fUxzpLgbsrIOuOi8jV+Iqmdu6gLf/LVItqo=
 github.com/orchestra-mcp/sdk-go v0.1.1/go.mod h1:UqdcRt6YB26TDfGr2TCC6b0hbtQsdTJeiTyS6cv9A4k=
