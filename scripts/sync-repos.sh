@@ -97,8 +97,26 @@ echo ""
 
 SYNCED=0; UNCHANGED=0; ERRORS=0
 
+# Dependency tiers — pause after pushing core deps so Go proxy can index them
+# before downstream repos trigger CI with go mod download.
+TIER1_PACKAGES="proto gen-go sdk-go"
+TIER1_PUSHED=false
+
 while IFS='|' read -r name path url; do
   [[ -z "$name" ]] && continue
+
+  # Pause after tier 1 (core deps) before pushing tier 2 (plugins/services)
+  if $TIER1_PUSHED && ! $DRY_RUN; then
+    is_tier1=false
+    for t1 in $TIER1_PACKAGES; do
+      [[ "$name" == "$t1" ]] && is_tier1=true
+    done
+    if ! $is_tier1; then
+      info "Waiting 30s for Go proxy to index core dependencies..."
+      sleep 30
+      TIER1_PUSHED=false  # Only pause once
+    fi
+  fi
 
   src="${ROOT}/${path}"
 
