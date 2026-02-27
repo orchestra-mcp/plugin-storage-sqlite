@@ -16,7 +16,29 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+        shell: bash
+        run: |
+          python3 << 'PYEOF'
+          import json, subprocess, sys
+          lock = json.load(open("orchestra.lock"))
+          for pkg in lock["packages"]:
+              url = pkg["source"]["url"]
+              path = pkg["path"]
+              version = pkg["version"]
+              ref = pkg["source"].get("reference", "master")
+              # Try pinned version first, fall back to branch
+              result = subprocess.run(["git", "clone", "--depth", "1", "--branch", version, url, path],
+                                      capture_output=True)
+              if result.returncode != 0:
+                  print(f"  Tag {version} not found for {path}, falling back to {ref}")
+                  result = subprocess.run(["git", "clone", "--depth", "1", "--branch", ref, url, path],
+                                          capture_output=True)
+                  if result.returncode != 0:
+                      print(f"  FATAL: clone failed for {path}", file=sys.stderr)
+                      print(result.stderr.decode(), file=sys.stderr)
+                      sys.exit(1)
+              print(f"  Cloned {path}")
+          PYEOF
 
       - name: Build all binaries
         run: make build
@@ -36,7 +58,33 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+        shell: bash
+        run: |
+          python3 << 'PYEOF'
+          import json, subprocess, sys
+          lock = json.load(open("orchestra.lock"))
+          for pkg in lock["packages"]:
+              url = pkg["source"]["url"]
+              path = pkg["path"]
+              version = pkg["version"]
+              ref = pkg["source"].get("reference", "master")
+              result = subprocess.run(["git", "clone", "--depth", "1", "--branch", version, url, path],
+                                      capture_output=True)
+              if result.returncode != 0:
+                  print(f"  Tag {version} not found for {path}, falling back to {ref}")
+                  result = subprocess.run(["git", "clone", "--depth", "1", "--branch", ref, url, path],
+                                          capture_output=True)
+                  if result.returncode != 0:
+                      print(f"  FATAL: clone failed for {path}", file=sys.stderr)
+                      print(result.stderr.decode(), file=sys.stderr)
+                      sys.exit(1)
+              print(f"  Cloned {path}")
+          PYEOF
 
       - name: Vet
-        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type'] not in ('proto',)]" | while read path; do go vet "./${path}/..."; done
+        shell: bash
+        run: |
+          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto",)]' | while read path; do
+            echo "go vet ./${path}/..."
+            go vet "./${path}/..."
+          done
