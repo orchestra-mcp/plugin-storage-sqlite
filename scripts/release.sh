@@ -19,6 +19,7 @@ DRY_RUN=false
 FORCE=false
 SYNC_ONLY=false
 SKIP_SYNC=false
+PRERELEASE=false
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 info()    { printf "${CYAN}[release]${NC} %s\n" "$*"; }
@@ -36,10 +37,11 @@ VERSION=""
 FILTER=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --dry-run)    DRY_RUN=true; shift ;;
-    --force)      FORCE=true; shift ;;
-    --sync-only)  SYNC_ONLY=true; shift ;;
-    --skip-sync)  SKIP_SYNC=true; shift ;;
+    --dry-run)     DRY_RUN=true; shift ;;
+    --force)       FORCE=true; shift ;;
+    --sync-only)   SYNC_ONLY=true; shift ;;
+    --skip-sync)   SKIP_SYNC=true; shift ;;
+    --prerelease)  PRERELEASE=true; shift ;;
     --help|-h)
       echo "Usage: $0 <version> [--dry-run] [--force] [--sync-only] [--skip-sync] [repo ...]"
       echo ""
@@ -69,9 +71,9 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-# Validate semver format
-if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  fail "Invalid version format: $VERSION (expected vX.Y.Z)"
+# Validate semver format (allow pre-release suffix)
+if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+  fail "Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
   exit 1
 fi
 
@@ -187,11 +189,9 @@ while IFS='|' read -r name repo desc; do
   fi
 
   # Create the release (this also creates the tag)
-  if gh release create "${VERSION}" \
-    --repo "${repo}" \
-    --title "${VERSION}" \
-    --notes "${desc}" \
-    --target "${BRANCH}" 2>/dev/null; then
+  RELEASE_FLAGS=(--repo "${repo}" --title "${VERSION}" --notes "${desc}" --target "${BRANCH}")
+  $PRERELEASE && RELEASE_FLAGS+=(--prerelease)
+  if gh release create "${VERSION}" "${RELEASE_FLAGS[@]}" 2>/dev/null; then
     ok "${name}: https://github.com/${repo}/releases/tag/${VERSION}"
     RELEASED=$((RELEASED + 1))
   else

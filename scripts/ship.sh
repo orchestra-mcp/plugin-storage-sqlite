@@ -8,6 +8,7 @@
 #   ./scripts/ship.sh v0.2.0 --message "Add prompts"  # Custom commit message
 #   ./scripts/ship.sh v0.2.0 --skip-pr           # Skip PR (push directly to master)
 #   ./scripts/ship.sh v0.2.0 --branch feat/prompts    # Custom branch name
+#   ./scripts/ship.sh v0.0.1-beta --prerelease   # Pre-release tag
 
 set -euo pipefail
 
@@ -18,6 +19,7 @@ cd "$ROOT"
 VERSION=""
 DRY_RUN=false
 SKIP_PR=false
+PRERELEASE=false
 BRANCH_NAME=""
 COMMIT_MSG=""
 BASE_BRANCH="master"
@@ -37,12 +39,13 @@ usage() {
   cat <<EOF
 Usage: $0 <version> [options]
 
-  version                   Semver tag (e.g. v0.2.0)
+  version                   Semver tag (e.g. v0.2.0, v0.0.1-beta)
 
 Options:
   --message "msg"           Custom commit message (default: "Release <version>")
   --branch <name>           Branch name for PR (default: release/<version>)
   --skip-pr                 Push directly to master (no PR)
+  --prerelease              Mark GitHub releases as pre-release
   --dry-run                 Preview all steps without executing
   -h, --help                Show this help
 
@@ -51,11 +54,11 @@ What it does:
   2. Bumps go.mod dependency versions to match the release version
   3. Commits all changes
   4. Pushes to a branch, creates a PR, and merges it
-  5. Syncs code to all sub-repos (via sync-repos.sh)
-  6. Tags and creates GitHub releases (via release.sh)
+  5. Syncs code to all sub-repos (in dependency order)
+  6. Tags and creates GitHub releases (in dependency order with Go proxy delay)
   7. Tags the framework repo and creates the GitHub release
 
-Requires: git, gh (authenticated), make, python3
+Requires: git, gh (authenticated), make, python3, rsync
 EOF
   exit 0
 }
@@ -66,14 +69,15 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --dry-run)    DRY_RUN=true; shift ;;
-    --skip-pr)    SKIP_PR=true; shift ;;
-    --message)    COMMIT_MSG="$2"; shift 2 ;;
-    --branch)     BRANCH_NAME="$2"; shift 2 ;;
-    --help|-h)    usage ;;
-    v*)           VERSION="$1"; shift ;;
-    -*)           fail "Unknown flag: $1"; exit 1 ;;
-    *)            fail "Unknown argument: $1"; exit 1 ;;
+    --dry-run)      DRY_RUN=true; shift ;;
+    --skip-pr)      SKIP_PR=true; shift ;;
+    --prerelease)   PRERELEASE=true; shift ;;
+    --message)      COMMIT_MSG="$2"; shift 2 ;;
+    --branch)       BRANCH_NAME="$2"; shift 2 ;;
+    --help|-h)      usage ;;
+    v*)             VERSION="$1"; shift ;;
+    -*)             fail "Unknown flag: $1"; exit 1 ;;
+    *)              fail "Unknown argument: $1"; exit 1 ;;
   esac
 done
 
@@ -82,8 +86,9 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  fail "Invalid version format: $VERSION (expected vX.Y.Z)"
+# Allow vX.Y.Z and vX.Y.Z-suffix (e.g. v0.0.1-beta, v1.0.0-rc.1)
+if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+  fail "Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
   exit 1
 fi
 
@@ -96,7 +101,7 @@ fi
 
 step "0: Preflight"
 
-for cmd in git gh make python3; do
+for cmd in git gh make python3 rsync; do
   if ! command -v "$cmd" &>/dev/null; then
     fail "Required command not found: $cmd"
     exit 1
@@ -110,7 +115,9 @@ if ! gh auth status &>/dev/null; then
   exit 1
 fi
 GH_USER="$(gh api user -q .login 2>/dev/null || echo 'unknown')"
-ok "Authenticated as: ${GH_USER}"
+GIT_USER="$(git config user.name 2>/dev/null || echo 'unknown')"
+GIT_EMAIL="$(git config user.email 2>/dev/null || echo 'unknown')"
+ok "Authenticated as: ${GH_USER} (${GIT_USER} <${GIT_EMAIL}>)"
 
 # Check we're on master or allow branching from anywhere
 CURRENT_BRANCH="$(git branch --show-current)"
@@ -132,11 +139,12 @@ fi
 
 echo ""
 info "Plan:"
-info "  Version:  ${VERSION}"
-info "  Branch:   ${BRANCH_NAME}"
-info "  Message:  ${COMMIT_MSG}"
-info "  PR:       $($SKIP_PR && echo 'skip (direct push)' || echo 'yes')"
-info "  Dry run:  ${DRY_RUN}"
+info "  Version:    ${VERSION}"
+info "  Branch:     ${BRANCH_NAME}"
+info "  Message:    ${COMMIT_MSG}"
+info "  PR:         $($SKIP_PR && echo 'skip (direct push)' || echo 'yes')"
+info "  Prerelease: ${PRERELEASE}"
+info "  Dry run:    ${DRY_RUN}"
 echo ""
 
 # ──────────────────────────────────────────────────────
@@ -167,10 +175,6 @@ fi
 
 step "2: Bump go.mod Versions"
 
-# Strip the 'v' prefix for go.mod (go.mod uses "v0.1.1" format already, but
-# the internal dependency versions need to match the release).
-GOMOD_VERSION="${VERSION#v}"
-
 info "Bumping internal dependencies to ${VERSION} in all go.mod files..."
 
 if $DRY_RUN; then
@@ -196,21 +200,19 @@ for pkg in lock['packages']:
     changed=false
     for mod in "${INTERNAL_MODS[@]}"; do
       # Replace any version of this module with the new version
+      # Handles vX.Y.Z and vX.Y.Z-suffix (e.g. v0.1.1, v0.0.1-beta)
       if grep -q "${mod} v" "$gomod" 2>/dev/null; then
-        sed -i '' "s|${mod} v[0-9]*\.[0-9]*\.[0-9]*|${mod} ${VERSION}|g" "$gomod"
+        sed -i '' "s|${mod} v[0-9]*\.[0-9]*\.[0-9]*[^ ]*|${mod} ${VERSION}|g" "$gomod"
         changed=true
       fi
     done
     if $changed; then
       GOMOD_BUMPED=$((GOMOD_BUMPED + 1))
-      basename "$(dirname "$gomod")"
+      info "  $(basename "$(dirname "$gomod")")"
     fi
   done < <(find "${ROOT}/libs" -name "go.mod" -type f)
 
   ok "Updated ${GOMOD_BUMPED} go.mod file(s) to ${VERSION}"
-
-  # Also update go.sum hashes (the workspace handles it locally)
-  info "Note: go.sum updates will be resolved by CI via go mod download"
 fi
 
 # Re-check for changes after go.mod bumps
@@ -279,7 +281,7 @@ else
       --base "${BASE_BRANCH}" \
       --head "${BRANCH_NAME}" \
       --title "${COMMIT_MSG}" \
-      --body "$(cat <<EOF
+      --body "$(cat <<PREOF
 ## Summary
 - ${COMMIT_MSG}
 - Version: ${VERSION}
@@ -293,7 +295,7 @@ $(git log "${BASE_BRANCH}..${BRANCH_NAME}" --oneline 2>/dev/null || echo "- ${CO
 
 ---
 Shipped via \`scripts/ship.sh\`
-EOF
+PREOF
 )" 2>&1)"
 
     PR_NUMBER="$(echo "$PR_URL" | grep -oE '[0-9]+$' || echo "")"
@@ -317,27 +319,70 @@ EOF
 fi
 
 # ──────────────────────────────────────────────────────
-# Step 5: Sync to sub-repos
+# Step 5: Sync sub-repos (in dependency order)
 # ──────────────────────────────────────────────────────
 
 step "5: Sync to Sub-Repos"
 
-SYNC_ARGS=(--message "${COMMIT_MSG}")
-$DRY_RUN && SYNC_ARGS+=(--dry-run)
+# Sync in tiers: core deps first, then downstream
+# Tier 1: proto, gen-go (no internal Go deps)
+# Tier 2: sdk-go (depends on gen-go)
+# Tier 3: everything else (depends on gen-go + sdk-go)
+TIER1="proto gen-go"
+TIER2="sdk-go"
 
-"${ROOT}/scripts/sync-repos.sh" "${SYNC_ARGS[@]}"
+if $DRY_RUN; then
+  SYNC_ARGS=(--message "${COMMIT_MSG}" --dry-run)
+  "${ROOT}/scripts/sync-repos.sh" "${SYNC_ARGS[@]}"
+else
+  info "Tier 1: Core dependencies (proto, gen-go)..."
+  "${ROOT}/scripts/sync-repos.sh" --message "${COMMIT_MSG}" $TIER1
+  ok "Tier 1 synced"
+
+  info "Tier 2: SDK (sdk-go)..."
+  "${ROOT}/scripts/sync-repos.sh" --message "${COMMIT_MSG}" $TIER2
+  ok "Tier 2 synced"
+
+  info "Tier 3: Plugins and CLI..."
+  # Sync remaining repos (sync-repos.sh will skip ones already synced if no changes)
+  TIER3_REPOS=()
+  while IFS='|' read -r name _ _; do
+    skip=false
+    for t in $TIER1 $TIER2; do
+      [[ "$name" == "$t" ]] && skip=true
+    done
+    $skip || TIER3_REPOS+=("$name")
+  done < <(python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    name = pkg['name'].split('/')[-1]
+    path = pkg['path']
+    url = pkg['source']['url']
+    print(f'{name}|{path}|{url}')
+")
+  "${ROOT}/scripts/sync-repos.sh" --message "${COMMIT_MSG}" "${TIER3_REPOS[@]}"
+  ok "Tier 3 synced"
+fi
 
 # ──────────────────────────────────────────────────────
-# Step 6: Tag and release
+# Step 6: Tag and release (in dependency order)
 # ──────────────────────────────────────────────────────
 
 step "6: Tag & Release"
 
 RELEASE_ARGS=("${VERSION}")
 $DRY_RUN && RELEASE_ARGS+=(--dry-run)
+$PRERELEASE && RELEASE_ARGS+=(--prerelease)
 RELEASE_ARGS+=(--skip-sync)  # Already synced in step 5
 
 "${ROOT}/scripts/release.sh" "${RELEASE_ARGS[@]}"
+
+# Wait for Go proxy to index core tags before downstream CI triggers
+if ! $DRY_RUN; then
+  info "Waiting 20s for Go proxy to index new tags..."
+  sleep 20
+fi
 
 # ──────────────────────────────────────────────────────
 # Step 7: Tag the framework repo
@@ -357,14 +402,14 @@ else
     ok "Tagged framework: ${VERSION}"
   fi
 
-  # Create framework release (triggers CI release workflow for binary builds)
+  # Create framework release
+  RELEASE_FLAGS=(--repo "orchestra-mcp/framework" --title "${VERSION}" --generate-notes)
+  $PRERELEASE && RELEASE_FLAGS+=(--prerelease)
+
   if gh release view "${VERSION}" --repo "orchestra-mcp/framework" &>/dev/null 2>&1; then
     warn "Framework release ${VERSION} already exists"
   else
-    gh release create "${VERSION}" \
-      --repo "orchestra-mcp/framework" \
-      --title "${VERSION}" \
-      --generate-notes
+    gh release create "${VERSION}" "${RELEASE_FLAGS[@]}"
     ok "Framework release created: https://github.com/orchestra-mcp/framework/releases/tag/${VERSION}"
   fi
 fi
