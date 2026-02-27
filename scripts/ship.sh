@@ -301,7 +301,7 @@ else
     gh release create "${VERSION}" \
       --repo "orchestra-mcp/framework" \
       --title "${VERSION}" \
-      --generate-release-notes
+      --generate-notes
     ok "Framework release created: https://github.com/orchestra-mcp/framework/releases/tag/${VERSION}"
   fi
 fi
