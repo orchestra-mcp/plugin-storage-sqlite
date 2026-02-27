@@ -21,6 +21,7 @@ SKIP_PR=false
 BRANCH_NAME=""
 COMMIT_MSG=""
 BASE_BRANCH="master"
+LOCK_FILE="${ROOT}/orchestra.lock"
 
 # Colors
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -47,10 +48,12 @@ Options:
 
 What it does:
   1. Builds and tests everything
-  2. Commits all changes
-  3. Pushes to a branch, creates a PR, and merges it
-  4. Syncs code to all sub-repos (via sync-repos.sh)
-  5. Tags and creates GitHub releases (via release.sh)
+  2. Bumps go.mod dependency versions to match the release version
+  3. Commits all changes
+  4. Pushes to a branch, creates a PR, and merges it
+  5. Syncs code to all sub-repos (via sync-repos.sh)
+  6. Tags and creates GitHub releases (via release.sh)
+  7. Tags the framework repo and creates the GitHub release
 
 Requires: git, gh (authenticated), make, python3
 EOF
@@ -159,10 +162,70 @@ else
 fi
 
 # ──────────────────────────────────────────────────────
-# Step 2: Commit changes
+# Step 2: Bump go.mod dependency versions
 # ──────────────────────────────────────────────────────
 
-step "2: Commit"
+step "2: Bump go.mod Versions"
+
+# Strip the 'v' prefix for go.mod (go.mod uses "v0.1.1" format already, but
+# the internal dependency versions need to match the release).
+GOMOD_VERSION="${VERSION#v}"
+
+info "Bumping internal dependencies to ${VERSION} in all go.mod files..."
+
+if $DRY_RUN; then
+  info "(dry-run) would update go.mod files"
+else
+  # Read packages from orchestra.lock to find internal module paths
+  INTERNAL_MODS=()
+  while IFS= read -r mod; do
+    INTERNAL_MODS+=("$mod")
+  done < <(python3 -c "
+import json
+lock = json.load(open('${LOCK_FILE}'))
+for pkg in lock['packages']:
+    name = pkg['name']
+    # Only modules that appear as Go dependencies (skip proto, cli)
+    if pkg['type'] in ('lib', 'service', 'plugin', 'tools'):
+        print(f'github.com/{name}')
+")
+
+  # Find all go.mod files in libs/
+  GOMOD_BUMPED=0
+  while IFS= read -r gomod; do
+    changed=false
+    for mod in "${INTERNAL_MODS[@]}"; do
+      # Replace any version of this module with the new version
+      if grep -q "${mod} v" "$gomod" 2>/dev/null; then
+        sed -i '' "s|${mod} v[0-9]*\.[0-9]*\.[0-9]*|${mod} ${VERSION}|g" "$gomod"
+        changed=true
+      fi
+    done
+    if $changed; then
+      GOMOD_BUMPED=$((GOMOD_BUMPED + 1))
+      basename "$(dirname "$gomod")"
+    fi
+  done < <(find "${ROOT}/libs" -name "go.mod" -type f)
+
+  ok "Updated ${GOMOD_BUMPED} go.mod file(s) to ${VERSION}"
+
+  # Also update go.sum hashes (the workspace handles it locally)
+  info "Note: go.sum updates will be resolved by CI via go mod download"
+fi
+
+# Re-check for changes after go.mod bumps
+if [[ -z "$(git status --porcelain)" ]]; then
+  HAS_CHANGES=false
+else
+  CHANGED_FILES="$(git status --porcelain | wc -l | tr -d ' ')"
+  HAS_CHANGES=true
+fi
+
+# ──────────────────────────────────────────────────────
+# Step 3: Commit changes
+# ──────────────────────────────────────────────────────
+
+step "3: Commit"
 
 if $HAS_CHANGES; then
   if $DRY_RUN; then
@@ -181,10 +244,10 @@ else
 fi
 
 # ──────────────────────────────────────────────────────
-# Step 3: Push and create PR (or direct push)
+# Step 4: Push and create PR (or direct push)
 # ──────────────────────────────────────────────────────
 
-step "3: Push & PR"
+step "4: Push & PR"
 
 if $SKIP_PR; then
   # Direct push to master
@@ -254,10 +317,10 @@ EOF
 fi
 
 # ──────────────────────────────────────────────────────
-# Step 4: Sync to sub-repos
+# Step 5: Sync to sub-repos
 # ──────────────────────────────────────────────────────
 
-step "4: Sync to Sub-Repos"
+step "5: Sync to Sub-Repos"
 
 SYNC_ARGS=(--message "${COMMIT_MSG}")
 $DRY_RUN && SYNC_ARGS+=(--dry-run)
@@ -265,22 +328,22 @@ $DRY_RUN && SYNC_ARGS+=(--dry-run)
 "${ROOT}/scripts/sync-repos.sh" "${SYNC_ARGS[@]}"
 
 # ──────────────────────────────────────────────────────
-# Step 5: Tag and release
+# Step 6: Tag and release
 # ──────────────────────────────────────────────────────
 
-step "5: Tag & Release"
+step "6: Tag & Release"
 
 RELEASE_ARGS=("${VERSION}")
 $DRY_RUN && RELEASE_ARGS+=(--dry-run)
-RELEASE_ARGS+=(--skip-sync)  # Already synced in step 4
+RELEASE_ARGS+=(--skip-sync)  # Already synced in step 5
 
 "${ROOT}/scripts/release.sh" "${RELEASE_ARGS[@]}"
 
 # ──────────────────────────────────────────────────────
-# Step 6: Tag the framework repo
+# Step 7: Tag the framework repo
 # ──────────────────────────────────────────────────────
 
-step "6: Framework Tag"
+step "7: Framework Tag"
 
 if $DRY_RUN; then
   info "(dry-run) would tag framework repo with ${VERSION}"
