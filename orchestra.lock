@@ -7,7 +7,7 @@
     "packages": [
         {
             "name": "orchestra-mcp/proto",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/proto.git",
@@ -20,7 +20,7 @@
         },
         {
             "name": "orchestra-mcp/gen-go",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/gen-go.git",
@@ -36,7 +36,7 @@
         },
         {
             "name": "orchestra-mcp/sdk-go",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/sdk-go.git",
@@ -52,7 +52,7 @@
         },
         {
             "name": "orchestra-mcp/orchestrator",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/orchestrator.git",
@@ -69,7 +69,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-storage-markdown",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-storage-markdown.git",
@@ -86,7 +86,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-tools-features",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-tools-features.git",
@@ -103,7 +103,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-transport-stdio",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-transport-stdio.git",
@@ -120,7 +120,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-tools-marketplace",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-tools-marketplace.git",
@@ -137,7 +137,7 @@
         },
         {
             "name": "orchestra-mcp/cli",
-            "version": "v0.0.2-beta",
+            "version": "v0.0.3-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/cli.git",
