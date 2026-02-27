@@ -47,10 +47,21 @@ detect_platform() {
 # Resolve the download URL.
 resolve_url() {
     if [ "$VERSION" = "latest" ]; then
-        URL="https://github.com/${GITHUB_REPO}/releases/latest/download/orchestra-${PLATFORM}.tar.gz"
-    else
-        URL="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}/orchestra-${PLATFORM}.tar.gz"
+        # GitHub /releases/latest only returns non-prerelease. Use API to get the
+        # most recent release (including prereleases).
+        if command -v curl >/dev/null 2>&1; then
+            VERSION="$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases" \
+                | grep -m1 '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+        elif command -v wget >/dev/null 2>&1; then
+            VERSION="$(wget -qO- "https://api.github.com/repos/${GITHUB_REPO}/releases" \
+                | grep -m1 '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+        fi
+        if [ -z "$VERSION" ]; then
+            echo "Error: Could not determine latest version." >&2
+            exit 1
+        fi
     fi
+    URL="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}/orchestra-${PLATFORM}.tar.gz"
 }
 
 # Download and install.
