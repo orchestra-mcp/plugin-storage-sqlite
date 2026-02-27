@@ -123,9 +123,9 @@ while IFS='|' read -r name path url; do
   # Pull latest to ensure we're on the tip of remote
   git pull --quiet origin "${BRANCH}" 2>/dev/null || true
 
-  # Replace contents (keep .git)
+  # Replace contents (keep .git from clone, exclude .git from source)
   find "${tmp}/repo" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-  cp -a "${src}/." "${tmp}/repo/"
+  rsync -a --exclude '.git' "${src}/" "${tmp}/repo/"
 
   # Check for changes
   git add -A
@@ -143,9 +143,20 @@ while IFS='|' read -r name path url; do
     else
       git commit -m "${COMMIT_MSG}" --quiet
       if ! git push origin "${BRANCH}" --quiet 2>/dev/null; then
-        # If push fails (race condition), pull --rebase and retry once
-        warn "${name}: push failed, rebasing and retrying..."
-        git pull --rebase --quiet origin "${BRANCH}" 2>/dev/null
+        # Push failed — monorepo is source of truth, so reset to our content
+        warn "${name}: push failed, resetting to monorepo content..."
+        # Abort any in-progress rebase
+        git rebase --abort 2>/dev/null || true
+        # Pull remote, then replace all content with monorepo version
+        git reset --hard HEAD~1 2>/dev/null || true
+        git pull --quiet origin "${BRANCH}" 2>/dev/null || true
+        # Re-replace contents with monorepo source (keep .git, exclude source .git)
+        find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+        rsync -a --exclude '.git' "${src}/" .
+        git add -A
+        if ! git diff --cached --quiet; then
+          git commit -m "${COMMIT_MSG}" --quiet
+        fi
         git push origin "${BRANCH}" --quiet
       fi
       ok "${name}: pushed"
