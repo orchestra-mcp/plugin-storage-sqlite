@@ -92,12 +92,26 @@ install() {
     tar -xzf "${TMP_DIR}/orchestra.tar.gz" -C "$TMP_DIR"
 
     echo "Installing to ${INSTALL_DIR}..."
-    mkdir -p "$INSTALL_DIR"
+
+    # Check write permissions, use sudo if needed.
+    SUDO=""
+    if [ ! -w "$INSTALL_DIR" ] 2>/dev/null || { [ ! -d "$INSTALL_DIR" ] && ! mkdir -p "$INSTALL_DIR" 2>/dev/null; }; then
+        if command -v sudo >/dev/null 2>&1; then
+            echo "  (need sudo for ${INSTALL_DIR})"
+            SUDO="sudo"
+        else
+            echo "Error: No write permission to ${INSTALL_DIR} and sudo not available." >&2
+            echo "Try: INSTALL_DIR=~/.local/bin sh install.sh" >&2
+            exit 1
+        fi
+    fi
+
+    $SUDO mkdir -p "$INSTALL_DIR"
 
     for bin in orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace; do
         if [ -f "${TMP_DIR}/${bin}" ]; then
-            cp "${TMP_DIR}/${bin}" "${INSTALL_DIR}/${bin}"
-            chmod +x "${INSTALL_DIR}/${bin}"
+            $SUDO cp "${TMP_DIR}/${bin}" "${INSTALL_DIR}/${bin}"
+            $SUDO chmod +x "${INSTALL_DIR}/${bin}"
             echo "  installed ${INSTALL_DIR}/${bin}"
         fi
     done
