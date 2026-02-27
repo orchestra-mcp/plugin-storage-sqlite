@@ -108,7 +108,7 @@ while IFS='|' read -r name path url; do
     continue
   fi
 
-  # Clone into temp dir
+  # Clone into temp dir (full clone to have complete history)
   tmp="$(mktemp -d)"
 
   if ! git clone --quiet --branch "${BRANCH}" "${url}" "${tmp}/repo" 2>/dev/null; then
@@ -118,12 +118,16 @@ while IFS='|' read -r name path url; do
     continue
   fi
 
+  cd "${tmp}/repo"
+
+  # Pull latest to ensure we're on the tip of remote
+  git pull --quiet origin "${BRANCH}" 2>/dev/null || true
+
   # Replace contents (keep .git)
   find "${tmp}/repo" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
   cp -a "${src}/." "${tmp}/repo/"
 
   # Check for changes
-  cd "${tmp}/repo"
   git add -A
 
   if git diff --cached --quiet; then
@@ -138,7 +142,12 @@ while IFS='|' read -r name path url; do
       SYNCED=$((SYNCED + 1))
     else
       git commit -m "${COMMIT_MSG}" --quiet
-      git push origin "${BRANCH}" --quiet
+      if ! git push origin "${BRANCH}" --quiet 2>/dev/null; then
+        # If push fails (race condition), pull --rebase and retry once
+        warn "${name}: push failed, rebasing and retrying..."
+        git pull --rebase --quiet origin "${BRANCH}" 2>/dev/null
+        git push origin "${BRANCH}" --quiet
+      fi
       ok "${name}: pushed"
       SYNCED=$((SYNCED + 1))
     fi

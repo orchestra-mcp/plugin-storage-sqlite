@@ -1,6 +1,6 @@
 {
     "name": "orchestra-mcp/framework",
-    "description": "Orchestra MCP \u2014 AI-agentic plugin host framework with QUIC mesh, mTLS, and Protobuf.",
+    "description": "Orchestra MCP — AI-agentic plugin host framework with QUIC mesh, mTLS, and Protobuf.",
     "type": "framework",
     "license": "MIT",
     "homepage": "https://orchestra-mcp.dev",
