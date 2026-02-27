@@ -1,10 +1,11 @@
 go 1.23
 
 use (
-	./gen/go
-	./libs/go
-	./plugins/storage-markdown
-	./plugins/tools-features
-	./plugins/transport-stdio
-	./services/orchestrator
+	./libs/cli
+	./libs/gen-go
+	./libs/sdk-go
+	./libs/orchestrator
+	./libs/plugin-storage-markdown
+	./libs/plugin-tools-features
+	./libs/plugin-transport-stdio
 )

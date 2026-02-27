@@ -2,10 +2,59 @@
 
 An AI-agentic IDE framework built on a plugin host architecture. Every capability is a plugin — storage, tools, transport, AI — communicating over QUIC with mTLS and Protobuf messages.
 
+## Install
+
+```bash
+# macOS / Linux — one-line install
+curl -fsSL https://raw.githubusercontent.com/orchestra-mcp/framework/master/scripts/install.sh | sh
+
+# Homebrew
+brew install orchestra-mcp/tap/orchestra
+
+# npm
+npx @orchestra-mcp/cli init
+
+# From source
+git clone https://github.com/orchestra-mcp/framework.git
+cd framework && make install
+```
+
+## Quick Start
+
+```bash
+# 1. Initialize Orchestra in your project (auto-detects your IDE)
+cd your-project
+orchestra init
+
+# 2. That's it — your AI IDE now has 34 project management tools
+```
+
+`orchestra init` detects your IDE and writes the correct MCP config. Supported IDEs:
+
+| IDE | Config File |
+|-----|-------------|
+| Claude Code | `.mcp.json` |
+| Cursor | `.cursor/mcp.json` |
+| VS Code / Copilot | `.vscode/mcp.json` |
+| Cline | `.vscode/mcp.json` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+| Codex (OpenAI) | `.codex/config.toml` |
+| Gemini Code Assist | `.gemini/settings.json` |
+| Zed | `.zed/settings.json` |
+| Continue.dev | `.continue/mcpServers/orchestra.yaml` |
+
+```bash
+# Configure a specific IDE
+orchestra init --ide=cursor
+
+# Configure ALL supported IDEs at once
+orchestra init --all
+```
+
 ## Architecture
 
 ```
-Agent (Claude, GPT, etc.)
+Agent (Claude, GPT, Gemini, etc.)
   │ JSON-RPC (stdin/stdout)
   ▼
 transport.stdio
@@ -19,69 +68,123 @@ tools.features (34 tools)    storage.markdown (disk)
 
 **Star topology** — the orchestrator is the only router. Plugins never talk directly to each other. Any language that speaks QUIC + Protobuf can be a plugin.
 
-## Quick Start
+## CLI Commands
 
 ```bash
-# Install dependencies
-make install
+orchestra init      # Initialize MCP configs for your IDE(s)
+orchestra serve     # Start the MCP stdio server (used by IDE configs automatically)
+orchestra version   # Print version info
+orchestra help      # Show usage
+```
 
-# Build all binaries
-make build
+### `orchestra init`
 
-# Run all tests (66 unit + 1 E2E)
-make test
-make test-e2e
+```
+--workspace=DIR   Project directory (default: current directory)
+--ide=NAME        Target IDE: claude, cursor, vscode, cline, windsurf, codex, gemini, zed, continue
+--all             Generate configs for all supported IDEs
+```
 
-# Start the system
-./bin/orchestrator --config plugins.yaml
-# In another terminal:
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"demo","version":"0.1.0"}}}' | ./bin/transport-stdio --orchestrator-addr=localhost:50100
+### `orchestra serve`
+
+```
+--workspace=DIR   Project workspace directory (default: current directory)
+--certs-dir=DIR   mTLS certificates directory (default: ~/.orchestra/certs)
+--log=FILE        Log file path (default: .orchestra-mcp.log)
 ```
 
 ## Binaries
 
 | Binary | Description |
 |--------|-------------|
-| `bin/orchestrator` | Central hub — starts plugins, routes QUIC messages |
-| `bin/storage-markdown` | File storage with `<!-- META {json} META -->` + Markdown format |
-| `bin/tools-features` | 34 feature-driven workflow tools |
-| `bin/transport-stdio` | MCP JSON-RPC bridge (stdin/stdout to QUIC) |
+| `orchestra` | CLI — init, serve, version |
+| `orchestrator` | Central hub — starts plugins, routes QUIC messages |
+| `storage-markdown` | File storage with `<!-- META {json} META -->` + Markdown body |
+| `tools-features` | 34 feature-driven workflow tools |
+| `transport-stdio` | MCP JSON-RPC bridge (stdin/stdout to QUIC) |
+
+All 5 binaries are co-located in the same directory. `orchestra serve` finds the other 4 as siblings.
+
+## Feature Workflow (34 Tools)
+
+The tools.features plugin implements an 11-state feature lifecycle:
+
+```
+backlog → todo → in-progress → ready-for-testing → in-testing →
+  ready-for-docs → in-docs → documented → in-review → done
+                                              │
+                      needs-edits ◄───────────┘
+```
+
+### Tool Categories
+
+| Category | Count | Tools |
+|----------|-------|-------|
+| **Project** | 4 | `create_project`, `list_projects`, `delete_project`, `get_project_status` |
+| **Feature** | 6 | `create_feature`, `get_feature`, `update_feature`, `list_features`, `delete_feature`, `search_features` |
+| **Workflow** | 5 | `advance_feature`, `reject_feature`, `get_next_feature`, `set_current_feature`, `get_workflow_status` |
+| **Review** | 3 | `request_review`, `submit_review`, `get_pending_reviews` |
+| **Dependencies** | 3 | `add_dependency`, `remove_dependency`, `get_dependency_graph` |
+| **WIP Limits** | 3 | `set_wip_limits`, `get_wip_limits`, `check_wip_limit` |
+| **Reporting** | 3 | `get_progress`, `get_blocked_features`, `get_review_queue` |
+| **Metadata** | 7 | `add_labels`, `remove_labels`, `assign_feature`, `unassign_feature`, `set_estimate`, `save_note`, `list_notes` |
+
+All tools return formatted Markdown (tables, headings, bold text).
 
 ## Project Structure
 
 ```
 orchestra-agents/
-├── proto/                          # Protobuf contract (plugin.proto)
-├── gen/go/                         # Generated Go code from proto
-├── libs/go/                        # Plugin SDK
-│   ├── plugin/                     #   QUIC server/client, mTLS, framing
-│   ├── types/                      #   Feature, Project, Workflow types
-│   ├── helpers/                    #   Args, results, paths, validation
-│   └── protocol/                   #   JSON-RPC + MCP types
-├── services/orchestrator/          # Orchestrator service
-│   ├── cmd/main.go                 #   Entry point
-│   └── internal/                   #   Config, loader, router, server
+├── cmd/orchestra/                     # CLI binary (init, serve, version)
+│   ├── main.go
+│   └── internal/
+│       ├── serve.go                   #   MCP server launcher
+│       ├── initcmd.go                 #   IDE config generator
+│       ├── ide.go                     #   9 IDE format definitions
+│       ├── detect.go                  #   Project name/type detection
+│       └── version.go                 #   Version info
+├── proto/                             # Protobuf contract (plugin.proto)
+├── gen/go/                            # Generated Go code from proto
+├── libs/go/                           # Plugin SDK
+│   ├── plugin/                        #   QUIC server/client, mTLS, framing
+│   ├── types/                         #   Feature, Project, Workflow types
+│   ├── helpers/                       #   Args, results, paths, validation, formatters
+│   └── protocol/                      #   JSON-RPC + MCP types
+├── services/orchestrator/             # Orchestrator service
+│   ├── cmd/main.go
+│   └── internal/                      #   Config, loader, router, server
 ├── plugins/
-│   ├── storage-markdown/           # Markdown file storage plugin
-│   ├── tools-features/             # 34 workflow tools plugin
-│   └── transport-stdio/            # MCP stdio bridge plugin
+│   ├── storage-markdown/              # Markdown file storage plugin
+│   ├── tools-features/                # 34 workflow tools plugin
+│   └── transport-stdio/               # MCP stdio bridge plugin
+├── packaging/
+│   ├── homebrew/orchestra.rb          # Homebrew formula template
+│   └── npm/                           # npm wrapper package
+├── scripts/
+│   ├── install.sh                     # curl | sh installer
+│   ├── mcp-serve.sh                   # Legacy MCP launcher (use orchestra serve instead)
+│   └── test-e2e.sh                    # End-to-end integration test
+├── .github/workflows/
+│   ├── ci.yml                         # CI: build + test on push/PR
+│   └── release.yml                    # Release: cross-compile on tag push
 ├── docs/
-│   ├── artifacts/                  # 17 design artifacts
-│   └── implementation/             # Step-by-step implementation docs (01-07)
-├── scripts/test-e2e.sh             # End-to-end integration test
-├── plugins.yaml                    # Default plugin configuration
-├── go.work                         # Go workspace (6 modules)
-└── Makefile                        # Build, test, clean, proto targets
+│   ├── artifacts/                     # 17 design artifacts
+│   └── implementation/                # Step-by-step build docs (01-08)
+├── plugins.yaml                       # Default plugin configuration
+├── go.work                            # Go workspace (7 modules)
+└── Makefile                           # Build, test, install, release, clean
 ```
 
 ## Makefile Targets
 
 ```bash
-make proto              # Lint + generate proto code
-make build              # Build all 4 binaries to bin/
+make build              # Build all 5 binaries to bin/
 make test               # Run all unit tests (66 tests)
 make test-e2e           # Build + run end-to-end integration test
+make install            # Install all 5 binaries to /usr/local/bin
+make release            # Cross-compile for darwin/linux × amd64/arm64
 make clean              # Remove build artifacts and certs
+make proto              # Lint + generate proto code
 ```
 
 ## Plugin SDK
@@ -93,7 +196,7 @@ package main
 
 import (
     "context"
-    "github.com/orchestrated-mcp/framework/libs/go/plugin"
+    "github.com/orchestra-mcp/sdk-go/plugin"
     "google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -117,29 +220,6 @@ func main() {
 }
 ```
 
-## Feature Workflow (34 Tools)
-
-The tools.features plugin implements an 11-state feature lifecycle:
-
-```
-backlog → todo → in-progress → ready-for-review → in-review → done
-                      ↑                                  │
-                      └──── needs-edits ◄────────────────┘
-```
-
-### Tool Categories
-
-| Category | Tools | Description |
-|----------|-------|-------------|
-| Project | 4 | create, list, delete, get_status |
-| Feature | 6 | create, get, update, list, delete, search |
-| Workflow | 5 | advance, reject, get_next, set_current, get_status |
-| Review | 3 | request, submit, get_pending |
-| Dependencies | 3 | add, remove, get_graph |
-| WIP Limits | 3 | set, get, check |
-| Reporting | 3 | progress, blocked, review_queue |
-| Metadata | 7 | labels, assignment, estimate, notes |
-
 ## Protocol
 
 All communication uses length-delimited Protobuf over QUIC with mTLS:
@@ -159,10 +239,16 @@ All communication uses length-delimited Protobuf over QUIC with mTLS:
 - **Transport**: QUIC with mTLS (no gRPC)
 - **Storage**: Markdown files with JSON metadata headers
 
-## Module Path
+## Module Paths
 
 ```
-github.com/orchestrated-mcp/framework
+github.com/orchestra-mcp/gen-go                    # Generated protobuf code
+github.com/orchestra-mcp/sdk-go                    # Plugin SDK
+github.com/orchestra-mcp/orchestrator              # Central hub
+github.com/orchestra-mcp/plugin-storage-markdown   # Storage plugin
+github.com/orchestra-mcp/plugin-tools-features     # Tools plugin
+github.com/orchestra-mcp/plugin-transport-stdio    # Transport plugin
+github.com/orchestra-mcp/cli                       # CLI binary
 ```
 
 ## License

@@ -1,22 +1,12 @@
 {
   "mcpServers": {
-    "figma": {
+    "orchestra": {
       "args": [
-        "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=${FIGMA_API_KEY}"
-      ],
-      "command": "npx",
-      "env": {
-        "FIGMA_API_KEY": "${FIGMA_API_KEY}"
-      }
-    },
-    "orchestra-mcp": {
-      "args": [
+        "serve",
         "--workspace",
         "/Users/fadymondy/Sites/orchestra-agents"
       ],
-      "command": "/usr/local/bin/orch"
+      "command": "/Users/fadymondy/Sites/orchestra-agents/bin/orchestra"
     }
   }
 }

@@ -5,6 +5,10 @@ bin/
 *.so
 *.dylib
 
+# Libs (cloned via orchestra install)
+libs/*
+!libs/.gitkeep
+
 # Generated protobuf
 gen/go/orchestra/
 
