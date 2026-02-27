@@ -1,16 +1,20 @@
-2026/02/27 07:00:38 orchestrator QUIC server listening on 127.0.0.1:64803
-2026/02/27 07:00:38 orchestrator listening on 127.0.0.1:64803
-2026/02/27 07:00:38 started plugin "storage.markdown" (pid=38139)
-2026/02/27 07:00:39 plugin "storage.markdown" ready at 127.0.0.1:57278
-2026/02/27 07:00:39 plugin "storage.markdown" registered and booted
-2026/02/27 07:00:39 plugin "storage.markdown" registered with router
-2026/02/27 07:00:39 started plugin "tools.features" (pid=38140)
-2026/02/27 07:00:39 plugin "tools.features" ready at 127.0.0.1:60023
-2026/02/27 07:00:39 plugin "tools.features" registered and booted
-2026/02/27 07:00:39 plugin "tools.features" registered with router
-transport.stdio: connected to orchestrator at 127.0.0.1:64803
-2026/02/27 07:00:40 received signal terminated, shutting down
-2026/02/27 07:00:40 orchestrator shutting down
-2026/02/27 07:00:40 stopping all plugins
-2026/02/27 07:00:40 shutdown request to "storage.markdown" failed: open stream: Application error 0x0 (remote)
-2026/02/27 07:00:40 stopped plugin "storage.markdown"
+2026/02/27 11:19:15 orchestrator QUIC server listening on 127.0.0.1:64425
+2026/02/27 11:19:15 orchestrator listening on 127.0.0.1:64425
+2026/02/27 11:19:15 started plugin "storage.markdown" (pid=84805)
+2026/02/27 11:19:15 plugin "storage.markdown" ready at 127.0.0.1:63962
+2026/02/27 11:19:15 plugin "storage.markdown" registered and booted
+2026/02/27 11:19:15 plugin "storage.markdown" registered with router
+2026/02/27 11:19:15 started plugin "tools.features" (pid=84806)
+2026/02/27 11:19:15 plugin "tools.features" ready at 127.0.0.1:50624
+2026/02/27 11:19:15 plugin "tools.features" registered and booted
+2026/02/27 11:19:15 plugin "tools.features" registered with router
+2026/02/27 11:19:15 started plugin "tools.marketplace" (pid=84807)
+2026/02/27 11:19:15 plugin "tools.marketplace" ready at 127.0.0.1:61342
+2026/02/27 11:19:15 plugin "tools.marketplace" registered and booted
+2026/02/27 11:19:15 plugin "tools.marketplace" registered with router
+transport.stdio: connected to orchestrator at 127.0.0.1:64425
+2026/02/27 11:19:16 notification: notifications/initialized
+transport.stdio: connected to orchestrator at 127.0.0.1:64425
+transport.stdio: connected to orchestrator at 127.0.0.1:64425
+2026/02/27 11:19:16 notification: notifications/initialized
+2026/02/27 11:19:16 notification: notifications/initialized

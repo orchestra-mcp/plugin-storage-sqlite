@@ -119,6 +119,23 @@
             }
         },
         {
+            "name": "orchestra-mcp/plugin-tools-marketplace",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-marketplace.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-marketplace tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-marketplace",
+            "binary": "tools-marketplace",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
             "name": "orchestra-mcp/cli",
             "version": "v0.1.0",
             "source": {

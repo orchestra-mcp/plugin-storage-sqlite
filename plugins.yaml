@@ -11,3 +11,8 @@ plugins:
   - id: tools.features
     binary: ./bin/tools-features
     enabled: true
+  - id: tools.marketplace
+    binary: ./bin/tools-marketplace
+    enabled: true
+    args:
+      - --workspace=.

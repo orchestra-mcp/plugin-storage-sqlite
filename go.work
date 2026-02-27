@@ -8,4 +8,5 @@ use (
 	./libs/plugin-storage-markdown
 	./libs/plugin-tools-features
 	./libs/plugin-transport-stdio
+	./libs/plugin-tools-marketplace
 )

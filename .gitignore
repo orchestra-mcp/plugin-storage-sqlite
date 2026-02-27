@@ -33,5 +33,8 @@ Thumbs.db
 # Test artifacts
 .projects/test-*/
 
+# Packs (each is its own GitHub repo)
+packs/
+
 # Old reference (tracked separately)
 orch-ref/

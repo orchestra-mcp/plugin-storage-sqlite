@@ -46,6 +46,7 @@ class Orchestra < Formula
     bin.install "storage-markdown"
     bin.install "tools-features"
     bin.install "transport-stdio"
+    bin.install "tools-marketplace"
   end
 
   test do

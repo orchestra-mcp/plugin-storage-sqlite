@@ -1,0 +1,21 @@
+---
+packs:
+    orchestra-mcp/pack-essentials:
+        agents:
+            - scrum-master
+            - devops
+            - qa-playwright
+        hooks:
+            - orchestra-mcp-hook
+        installed_at: "2026-02-27T09:21:36Z"
+        repo: github.com/orchestra-mcp/pack-essentials
+        skills:
+            - project-manager
+            - qa-testing
+            - docs
+            - plugin-generator
+        stacks:
+            - '*'
+        version: 0.1.0
+---
+

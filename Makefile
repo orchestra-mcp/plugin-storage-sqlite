@@ -1,4 +1,4 @@
-.PHONY: proto build build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli test test-unit test-e2e clean install release
+.PHONY: proto build build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli test test-unit test-e2e clean install release build-tools-marketplace
 
 # Directories
 BIN_DIR := bin
@@ -11,6 +11,7 @@ STORAGE_MARKDOWN := $(BIN_DIR)/storage-markdown
 TOOLS_FEATURES := $(BIN_DIR)/tools-features
 TRANSPORT_STDIO := $(BIN_DIR)/transport-stdio
 ORCHESTRA_CLI := $(BIN_DIR)/orchestra
+TOOLS_MARKETPLACE := $(BIN_DIR)/tools-marketplace
 
 # === Proto ===
 
@@ -19,7 +20,7 @@ proto:
 
 # === Build ===
 
-build: build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli
+build: build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli build-tools-marketplace
 
 build-orchestrator:
 	@mkdir -p $(BIN_DIR)
@@ -51,6 +52,7 @@ test-unit:
 	go test ./libs/plugin-storage-markdown/... -v
 	go test ./libs/plugin-tools-features/... -v
 	go test ./libs/plugin-transport-stdio/... -v
+	go test ./libs/plugin-tools-marketplace/... -v
 
 test-e2e: build
 	@bash scripts/test-e2e.sh
@@ -58,7 +60,7 @@ test-e2e: build
 # === Install ===
 
 PREFIX ?= /usr/local
-BINARIES := orchestra orchestrator storage-markdown tools-features transport-stdio
+BINARIES := orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace
 
 install: build
 	@mkdir -p $(PREFIX)/bin
@@ -90,8 +92,9 @@ release:
 			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/storage-markdown ./libs/plugin-storage-markdown/cmd/; \
 			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/tools-features ./libs/plugin-tools-features/cmd/; \
 			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/transport-stdio ./libs/plugin-transport-stdio/cmd/; \
-			tar -czf $(DIST_DIR)/orchestra-$$goos-$$goarch.tar.gz -C $(DIST_DIR) orchestra orchestrator storage-markdown tools-features transport-stdio; \
-			rm -f $(DIST_DIR)/orchestra $(DIST_DIR)/orchestrator $(DIST_DIR)/storage-markdown $(DIST_DIR)/tools-features $(DIST_DIR)/transport-stdio; \
+			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/tools-marketplace ./libs/plugin-tools-marketplace/cmd/; \
+			tar -czf $(DIST_DIR)/orchestra-$$goos-$$goarch.tar.gz -C $(DIST_DIR) orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace; \
+			rm -f $(DIST_DIR)/orchestra $(DIST_DIR)/orchestrator $(DIST_DIR)/storage-markdown $(DIST_DIR)/tools-features $(DIST_DIR)/transport-stdio $(DIST_DIR)/tools-marketplace; \
 		done; \
 	done
 	@echo "\nRelease tarballs in $(DIST_DIR)/"
@@ -102,3 +105,7 @@ release:
 clean:
 	rm -rf $(BIN_DIR) $(DIST_DIR)
 	rm -rf ~/.orchestra/certs
+
+build-tools-marketplace:
+	@mkdir -p $(BIN_DIR)
+	go build -o $(TOOLS_MARKETPLACE) ./libs/plugin-tools-marketplace/cmd/

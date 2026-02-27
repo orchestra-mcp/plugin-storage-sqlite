@@ -1,6 +1,6 @@
 {
     "name": "orchestra-mcp/framework",
-    "description": "Orchestra MCP — AI-agentic plugin host framework with QUIC mesh, mTLS, and Protobuf.",
+    "description": "Orchestra MCP \u2014 AI-agentic plugin host framework with QUIC mesh, mTLS, and Protobuf.",
     "type": "framework",
     "license": "MIT",
     "homepage": "https://orchestra-mcp.dev",
@@ -22,7 +22,8 @@
         "orchestra-mcp/plugin-storage-markdown": "^0.1.0",
         "orchestra-mcp/plugin-tools-features": "^0.1.0",
         "orchestra-mcp/plugin-transport-stdio": "^0.1.0",
-        "orchestra-mcp/cli": "^0.1.0"
+        "orchestra-mcp/cli": "^0.1.0",
+        "orchestra-mcp/plugin-tools-marketplace": "^0.1.0"
     },
     "config": {
         "org": "orchestra-mcp",
@@ -39,6 +40,7 @@
             "plugin-storage-markdown",
             "plugin-tools-features",
             "plugin-transport-stdio",
+            "plugin-tools-marketplace",
             "cli"
         ]
     }

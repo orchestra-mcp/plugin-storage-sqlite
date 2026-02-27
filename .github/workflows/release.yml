@@ -74,12 +74,13 @@ jobs:
           go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
           go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
           go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
+          go build -o dist/tools-marketplace ./libs/plugin-tools-marketplace/cmd/
 
       - name: Package tarball
         run: |
           cd dist
           tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
-            orchestra orchestrator storage-markdown tools-features transport-stdio
+            orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
