@@ -1,0 +1,10 @@
+go 1.23
+
+use (
+	./gen/go
+	./libs/go
+	./plugins/storage-markdown
+	./plugins/tools-features
+	./plugins/transport-stdio
+	./services/orchestrator
+)

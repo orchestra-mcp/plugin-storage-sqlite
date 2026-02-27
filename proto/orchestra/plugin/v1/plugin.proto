@@ -1,0 +1,205 @@
+syntax = "proto3";
+package orchestra.plugin.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+// ================================================================
+// Orchestra Plugin Protocol
+//
+// This is NOT a gRPC service. Messages are sent over QUIC streams
+// using length-delimited Protobuf framing:
+//   [4 bytes: big-endian uint32 length][N bytes: Protobuf message]
+//
+// Each RPC = one bidirectional QUIC stream:
+//   Client opens stream → writes PluginRequest → reads PluginResponse → close
+// ================================================================
+
+// ---- Request/Response Envelope ----
+
+message PluginRequest {
+  string request_id = 1; // UUIDv7
+  oneof request {
+    // Lifecycle
+    PluginManifest register = 10;
+    BootRequest boot = 11;
+    ShutdownRequest shutdown = 12;
+    HealthRequest health = 13;
+    // Tools
+    ToolRequest tool_call = 20;
+    ListToolsRequest list_tools = 21;
+    // Storage
+    StorageReadRequest storage_read = 30;
+    StorageWriteRequest storage_write = 31;
+    StorageDeleteRequest storage_delete = 32;
+    StorageListRequest storage_list = 33;
+  }
+}
+
+message PluginResponse {
+  string request_id = 1;
+  oneof response {
+    // Lifecycle
+    RegistrationResult register = 10;
+    BootResult boot = 11;
+    ShutdownResult shutdown = 12;
+    HealthResult health = 13;
+    // Tools
+    ToolResponse tool_call = 20;
+    ListToolsResponse list_tools = 21;
+    // Storage
+    StorageReadResponse storage_read = 30;
+    StorageWriteResponse storage_write = 31;
+    StorageDeleteResponse storage_delete = 32;
+    StorageListResponse storage_list = 33;
+  }
+}
+
+// ================================================================
+// Lifecycle
+// ================================================================
+
+message PluginManifest {
+  string id = 1;                          // "tools.features", "storage.markdown"
+  string version = 2;                     // semver
+  string language = 3;                    // "go", "rust", "swift", etc.
+  // What this plugin provides
+  repeated string provides_tools = 4;
+  repeated string provides_events = 5;
+  repeated string provides_storage = 6;   // ["markdown", "sqlite", "postgres"]
+  repeated string provides_transport = 7; // ["stdio", "webtransport"]
+  repeated string provides_ai = 8;        // ["claude", "openai"]
+  // What this plugin needs from other plugins (via orchestrator)
+  repeated string needs_storage = 9;
+  repeated string needs_events = 10;
+  repeated string needs_ai = 11;
+  repeated string needs_tools = 12;
+  // Metadata
+  string description = 13;
+  string author = 14;
+  string binary = 15;
+  repeated string args = 16;
+  map<string, string> env = 17;
+}
+
+message RegistrationResult {
+  bool accepted = 1;
+  string reject_reason = 2;
+}
+
+message BootRequest {
+  map<string, string> config = 1;
+}
+
+message BootResult {
+  bool ready = 1;
+  string error = 2;
+}
+
+message ShutdownRequest {
+  int32 timeout_seconds = 1;
+}
+
+message ShutdownResult {
+  bool clean = 1;
+}
+
+message HealthRequest {}
+
+message HealthResult {
+  Status status = 1;
+  string message = 2;
+  map<string, string> details = 3;
+
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_HEALTHY = 1;
+    STATUS_DEGRADED = 2;
+    STATUS_UNHEALTHY = 3;
+  }
+}
+
+// ================================================================
+// Tools
+// ================================================================
+
+message ToolRequest {
+  string tool_name = 1;
+  google.protobuf.Struct arguments = 2;
+  string caller_plugin = 3;
+  string trace_parent = 4;
+}
+
+message ToolResponse {
+  bool success = 1;
+  google.protobuf.Struct result = 2;
+  string error_code = 3;
+  string error_message = 4;
+}
+
+message ListToolsRequest {}
+
+message ListToolsResponse {
+  repeated ToolDefinition tools = 1;
+}
+
+message ToolDefinition {
+  string name = 1;
+  string description = 2;
+  google.protobuf.Struct input_schema = 3; // JSON Schema as Struct
+}
+
+// ================================================================
+// Storage
+// ================================================================
+
+message StorageReadRequest {
+  string path = 1;           // "projects/my-app/features/FEAT-001.md"
+  string storage_type = 2;   // "markdown" (default), "sqlite", "postgres"
+}
+
+message StorageReadResponse {
+  bytes content = 1;                      // Markdown body
+  google.protobuf.Struct metadata = 2;   // Structured fields (status, priority, etc.)
+  int64 version = 3;
+}
+
+message StorageWriteRequest {
+  string path = 1;
+  bytes content = 2;                      // Markdown body
+  google.protobuf.Struct metadata = 3;   // Structured fields
+  int64 expected_version = 4;            // 0 = create, >0 = CAS update
+  string storage_type = 5;
+}
+
+message StorageWriteResponse {
+  bool success = 1;
+  int64 new_version = 2;
+  string error = 3;
+}
+
+message StorageDeleteRequest {
+  string path = 1;
+  string storage_type = 2;
+}
+
+message StorageDeleteResponse {
+  bool success = 1;
+}
+
+message StorageListRequest {
+  string prefix = 1;       // "projects/my-app/features/"
+  string pattern = 2;      // "*.md"
+  string storage_type = 3;
+}
+
+message StorageListResponse {
+  repeated StorageEntry entries = 1;
+}
+
+message StorageEntry {
+  string path = 1;
+  int64 size = 2;
+  int64 version = 3;
+  google.protobuf.Timestamp modified_at = 4;
+}

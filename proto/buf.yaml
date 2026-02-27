@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: .
+    name: buf.build/orchestrated-mcp/framework
+deps: []
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

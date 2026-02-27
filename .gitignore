@@ -1,0 +1,33 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Generated protobuf
+gen/go/orchestra/
+
+# Go
+*.test
+*.out
+vendor/
+
+# Certificates (auto-generated)
+~/.orchestra/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+.projects/test-*/
+
+# Old reference (tracked separately)
+orch-ref/

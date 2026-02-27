@@ -1,0 +1,13 @@
+listen_addr: "localhost:50100"
+certs_dir: "~/.orchestra/certs"
+plugins:
+  - id: storage.markdown
+    binary: ./bin/storage-markdown
+    enabled: true
+    provides_storage:
+      - markdown
+    config:
+      workspace: .
+  - id: tools.features
+    binary: ./bin/tools-features
+    enabled: true
