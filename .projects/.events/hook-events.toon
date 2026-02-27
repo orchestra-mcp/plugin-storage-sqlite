@@ -12564,3 +12564,1047 @@ events:
         stop_hook_active: false
         transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
       timestamp: "2026-02-27T07:17:12Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Read
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            file_path: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+        tool_name: Read
+        tool_response:
+            file:
+                content: |
+                    name: CI
+
+                    on:
+                      push:
+                        branches: [master, main]
+                      pull_request:
+                        branches: [master, main]
+
+                    jobs:
+                      test:
+                        runs-on: ubuntu-latest
+                        steps:
+                          - uses: actions/checkout@v4
+                          - uses: actions/setup-go@v5
+                            with:
+                              go-version: '1.23'
+
+                          - name: Install dependencies
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  url = pkg['source']['url']
+                                  path = pkg['path']
+                                  version = pkg['version']
+                                  print(f'git clone --depth 1 --branch {version} {url} {path}')
+                              " | sh
+
+                          - name: Build all binaries
+                            run: make build
+
+                          - name: Run unit tests
+                            run: make test-unit
+
+                          - name: Run E2E tests
+                            run: make test-e2e
+
+                      lint:
+                        runs-on: ubuntu-latest
+                        steps:
+                          - uses: actions/checkout@v4
+                          - uses: actions/setup-go@v5
+                            with:
+                              go-version: '1.23'
+
+                          - name: Install dependencies
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  url = pkg['source']['url']
+                                  path = pkg['path']
+                                  version = pkg['version']
+                                  print(f'git clone --depth 1 --branch {version} {url} {path}')
+                              " | sh
+
+                          - name: Vet
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  if pkg['type'] != 'proto':
+                                      print(pkg['path'])
+                              " | while read path; do
+                                echo "go vet ./${path}/..."
+                                go vet "./${path}/..."
+                              done
+                filePath: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+                numLines: 71
+                startLine: 1
+                totalLines: 71
+            type: text
+        tool_use_id: toolu_01DYUxTSAdpN6G1FZsWiHA2e
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:21:09Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Write
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            content: |
+                name: CI
+
+                on:
+                  push:
+                    branches: [master, main]
+                  pull_request:
+                    branches: [master, main]
+
+                jobs:
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Build all binaries
+                        run: make build
+
+                      - name: Run unit tests
+                        run: make test-unit
+
+                      - name: Run E2E tests
+                        run: make test-e2e
+
+                  lint:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Vet
+                        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type']!='proto']" | while read path; do go vet "./${path}/..."; done
+            file_path: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+        tool_name: Write
+        tool_response:
+            content: |
+                name: CI
+
+                on:
+                  push:
+                    branches: [master, main]
+                  pull_request:
+                    branches: [master, main]
+
+                jobs:
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Build all binaries
+                        run: make build
+
+                      - name: Run unit tests
+                        run: make test-unit
+
+                      - name: Run E2E tests
+                        run: make test-e2e
+
+                  lint:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Vet
+                        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type']!='proto']" | while read path; do go vet "./${path}/..."; done
+            filePath: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+            originalFile: |
+                name: CI
+
+                on:
+                  push:
+                    branches: [master, main]
+                  pull_request:
+                    branches: [master, main]
+
+                jobs:
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              url = pkg['source']['url']
+                              path = pkg['path']
+                              version = pkg['version']
+                              print(f'git clone --depth 1 --branch {version} {url} {path}')
+                          " | sh
+
+                      - name: Build all binaries
+                        run: make build
+
+                      - name: Run unit tests
+                        run: make test-unit
+
+                      - name: Run E2E tests
+                        run: make test-e2e
+
+                  lint:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              url = pkg['source']['url']
+                              path = pkg['path']
+                              version = pkg['version']
+                              print(f'git clone --depth 1 --branch {version} {url} {path}')
+                          " | sh
+
+                      - name: Vet
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              if pkg['type'] != 'proto':
+                                  print(pkg['path'])
+                          " | while read path; do
+                            echo "go vet ./${path}/..."
+                            go vet "./${path}/..."
+                          done
+            structuredPatch:
+                - lines:
+                    - '           go-version: ''1.23'''
+                    - ' '
+                    - '       - name: Install dependencies'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              url = pkg[''source''][''url'']'
+                    - '-              path = pkg[''path'']'
+                    - '-              version = pkg[''version'']'
+                    - '-              print(f''git clone --depth 1 --branch {version} {url} {path}'')'
+                    - '-          " | sh'
+                    - '+        run: python3 -c "import json;[__import__(''subprocess'').run([''git'',''clone'',''--depth'',''1'',''--branch'',p[''version''],p[''source''][''url''],p[''path'']],check=True) for p in json.load(open(''orchestra.lock''))[''packages'']]"'
+                    - ' '
+                    - '       - name: Build all binaries'
+                    - '         run: make build'
+                  newLines: 7
+                  newStart: 16
+                  oldLines: 16
+                  oldStart: 16
+                - lines:
+                    - '           go-version: ''1.23'''
+                    - ' '
+                    - '       - name: Install dependencies'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              url = pkg[''source''][''url'']'
+                    - '-              path = pkg[''path'']'
+                    - '-              version = pkg[''version'']'
+                    - '-              print(f''git clone --depth 1 --branch {version} {url} {path}'')'
+                    - '-          " | sh'
+                    - '+        run: python3 -c "import json;[__import__(''subprocess'').run([''git'',''clone'',''--depth'',''1'',''--branch'',p[''version''],p[''source''][''url''],p[''path'']],check=True) for p in json.load(open(''orchestra.lock''))[''packages'']]"'
+                    - ' '
+                    - '       - name: Vet'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              if pkg[''type''] != ''proto'':'
+                    - '-                  print(pkg[''path''])'
+                    - '-          " | while read path; do'
+                    - '-            echo "go vet ./${path}/..."'
+                    - '-            go vet "./${path}/..."'
+                    - '-          done'
+                    - '+        run: python3 -c "import json;[print(p[''path'']) for p in json.load(open(''orchestra.lock''))[''packages''] if p[''type'']!=''proto'']" | while read path; do go vet "./${path}/..."; done'
+                  newLines: 7
+                  newStart: 36
+                  oldLines: 26
+                  oldStart: 45
+            type: update
+        tool_use_id: toolu_01FAdxt1q8hvKo5kFWQHq3CS
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:21:20Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Read
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            file_path: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/release.yml
+        tool_name: Read
+        tool_response:
+            file:
+                content: |
+                    name: Release
+
+                    on:
+                      push:
+                        tags: ['v*']
+
+                    permissions:
+                      contents: write
+
+                    jobs:
+                      build:
+                        strategy:
+                          matrix:
+                            include:
+                              - goos: darwin
+                                goarch: amd64
+                                runner: macos-latest
+                              - goos: darwin
+                                goarch: arm64
+                                runner: macos-latest
+                              - goos: linux
+                                goarch: amd64
+                                runner: ubuntu-latest
+                              - goos: linux
+                                goarch: arm64
+                                runner: ubuntu-latest
+                        runs-on: ${{ matrix.runner }}
+                        steps:
+                          - uses: actions/checkout@v4
+
+                          - uses: actions/setup-go@v5
+                            with:
+                              go-version: '1.23'
+
+                          - name: Install dependencies
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  url = pkg['source']['url']
+                                  path = pkg['path']
+                                  version = pkg['version']
+                                  print(f'git clone --depth 1 --branch {version} {url} {path}')
+                              " | sh
+
+                          - name: Build all binaries
+                            env:
+                              GOOS: ${{ matrix.goos }}
+                              GOARCH: ${{ matrix.goarch }}
+                            run: |
+                              VERSION="${GITHUB_REF_NAME}"
+                              COMMIT="$(git rev-parse --short HEAD)"
+                              DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                              LDFLAGS="-X github.com/orchestra-mcp/cli/internal.Version=${VERSION} \
+                                       -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
+                                       -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
+
+                              mkdir -p dist
+                              go build -ldflags "${LDFLAGS}" -o dist/orchestra ./libs/cli/
+                              go build -o dist/orchestrator ./libs/orchestrator/cmd/
+                              go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                              go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
+                              go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
+
+                          - name: Package tarball
+                            run: |
+                              cd dist
+                              tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
+                                orchestra orchestrator storage-markdown tools-features transport-stdio
+
+                          - name: Upload artifact
+                            uses: actions/upload-artifact@v4
+                            with:
+                              name: orchestra-${{ matrix.goos }}-${{ matrix.goarch }}
+                              path: dist/orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+                      release:
+                        needs: build
+                        runs-on: ubuntu-latest
+                        steps:
+                          - uses: actions/download-artifact@v4
+                            with:
+                              path: artifacts
+                              merge-multiple: true
+
+                          - name: Create GitHub Release
+                            uses: softprops/action-gh-release@v2
+                            with:
+                              generate_release_notes: true
+                              files: artifacts/*.tar.gz
+
+                      test:
+                        runs-on: ubuntu-latest
+                        steps:
+                          - uses: actions/checkout@v4
+                          - uses: actions/setup-go@v5
+                            with:
+                              go-version: '1.23'
+
+                          - name: Install dependencies
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  url = pkg['source']['url']
+                                  path = pkg['path']
+                                  version = pkg['version']
+                                  print(f'git clone --depth 1 --branch {version} {url} {path}')
+                              " | sh
+
+                          - name: Run unit tests
+                            run: |
+                              python3 -c "
+                              import json
+                              lock = json.load(open('orchestra.lock'))
+                              for pkg in lock['packages']:
+                                  if pkg['type'] not in ('proto', 'lib', 'cli'):
+                                      print(pkg['path'])
+                                  elif pkg['type'] == 'lib':
+                                      print(pkg['path'])
+                              " | while read path; do
+                                echo "go test ./${path}/... -v"
+                                go test "./${path}/..." -v
+                              done
+                filePath: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/release.yml
+                numLines: 127
+                startLine: 1
+                totalLines: 127
+            type: text
+        tool_use_id: toolu_01QZ7ZkmkanGdFLiazzv1Ch1
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:21:24Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Write
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            content: |
+                name: Release
+
+                on:
+                  push:
+                    tags: ['v*']
+
+                permissions:
+                  contents: write
+
+                jobs:
+                  build:
+                    strategy:
+                      matrix:
+                        include:
+                          - goos: darwin
+                            goarch: amd64
+                            runner: macos-latest
+                          - goos: darwin
+                            goarch: arm64
+                            runner: macos-latest
+                          - goos: linux
+                            goarch: amd64
+                            runner: ubuntu-latest
+                          - goos: linux
+                            goarch: arm64
+                            runner: ubuntu-latest
+                    runs-on: ${{ matrix.runner }}
+                    steps:
+                      - uses: actions/checkout@v4
+
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Build all binaries
+                        env:
+                          GOOS: ${{ matrix.goos }}
+                          GOARCH: ${{ matrix.goarch }}
+                        run: |
+                          VERSION="${GITHUB_REF_NAME}"
+                          COMMIT="$(git rev-parse --short HEAD)"
+                          DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                          LDFLAGS="-X github.com/orchestra-mcp/cli/internal.Version=${VERSION} \
+                                   -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
+                                   -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
+
+                          mkdir -p dist
+                          go build -ldflags "${LDFLAGS}" -o dist/orchestra ./libs/cli/
+                          go build -o dist/orchestrator ./libs/orchestrator/cmd/
+                          go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                          go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
+                          go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
+
+                      - name: Package tarball
+                        run: |
+                          cd dist
+                          tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
+                            orchestra orchestrator storage-markdown tools-features transport-stdio
+
+                      - name: Upload artifact
+                        uses: actions/upload-artifact@v4
+                        with:
+                          name: orchestra-${{ matrix.goos }}-${{ matrix.goarch }}
+                          path: dist/orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+                  release:
+                    needs: build
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/download-artifact@v4
+                        with:
+                          path: artifacts
+                          merge-multiple: true
+
+                      - name: Create GitHub Release
+                        uses: softprops/action-gh-release@v2
+                        with:
+                          generate_release_notes: true
+                          files: artifacts/*.tar.gz
+
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Run unit tests
+                        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type'] not in ('proto','cli')]" | while read path; do go test "./${path}/..." -v; done
+            file_path: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/release.yml
+        tool_name: Write
+        tool_response:
+            content: |
+                name: Release
+
+                on:
+                  push:
+                    tags: ['v*']
+
+                permissions:
+                  contents: write
+
+                jobs:
+                  build:
+                    strategy:
+                      matrix:
+                        include:
+                          - goos: darwin
+                            goarch: amd64
+                            runner: macos-latest
+                          - goos: darwin
+                            goarch: arm64
+                            runner: macos-latest
+                          - goos: linux
+                            goarch: amd64
+                            runner: ubuntu-latest
+                          - goos: linux
+                            goarch: arm64
+                            runner: ubuntu-latest
+                    runs-on: ${{ matrix.runner }}
+                    steps:
+                      - uses: actions/checkout@v4
+
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Build all binaries
+                        env:
+                          GOOS: ${{ matrix.goos }}
+                          GOARCH: ${{ matrix.goarch }}
+                        run: |
+                          VERSION="${GITHUB_REF_NAME}"
+                          COMMIT="$(git rev-parse --short HEAD)"
+                          DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                          LDFLAGS="-X github.com/orchestra-mcp/cli/internal.Version=${VERSION} \
+                                   -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
+                                   -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
+
+                          mkdir -p dist
+                          go build -ldflags "${LDFLAGS}" -o dist/orchestra ./libs/cli/
+                          go build -o dist/orchestrator ./libs/orchestrator/cmd/
+                          go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                          go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
+                          go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
+
+                      - name: Package tarball
+                        run: |
+                          cd dist
+                          tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
+                            orchestra orchestrator storage-markdown tools-features transport-stdio
+
+                      - name: Upload artifact
+                        uses: actions/upload-artifact@v4
+                        with:
+                          name: orchestra-${{ matrix.goos }}-${{ matrix.goarch }}
+                          path: dist/orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+                  release:
+                    needs: build
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/download-artifact@v4
+                        with:
+                          path: artifacts
+                          merge-multiple: true
+
+                      - name: Create GitHub Release
+                        uses: softprops/action-gh-release@v2
+                        with:
+                          generate_release_notes: true
+                          files: artifacts/*.tar.gz
+
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Run unit tests
+                        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type'] not in ('proto','cli')]" | while read path; do go test "./${path}/..." -v; done
+            filePath: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/release.yml
+            originalFile: |
+                name: Release
+
+                on:
+                  push:
+                    tags: ['v*']
+
+                permissions:
+                  contents: write
+
+                jobs:
+                  build:
+                    strategy:
+                      matrix:
+                        include:
+                          - goos: darwin
+                            goarch: amd64
+                            runner: macos-latest
+                          - goos: darwin
+                            goarch: arm64
+                            runner: macos-latest
+                          - goos: linux
+                            goarch: amd64
+                            runner: ubuntu-latest
+                          - goos: linux
+                            goarch: arm64
+                            runner: ubuntu-latest
+                    runs-on: ${{ matrix.runner }}
+                    steps:
+                      - uses: actions/checkout@v4
+
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              url = pkg['source']['url']
+                              path = pkg['path']
+                              version = pkg['version']
+                              print(f'git clone --depth 1 --branch {version} {url} {path}')
+                          " | sh
+
+                      - name: Build all binaries
+                        env:
+                          GOOS: ${{ matrix.goos }}
+                          GOARCH: ${{ matrix.goarch }}
+                        run: |
+                          VERSION="${GITHUB_REF_NAME}"
+                          COMMIT="$(git rev-parse --short HEAD)"
+                          DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                          LDFLAGS="-X github.com/orchestra-mcp/cli/internal.Version=${VERSION} \
+                                   -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
+                                   -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
+
+                          mkdir -p dist
+                          go build -ldflags "${LDFLAGS}" -o dist/orchestra ./libs/cli/
+                          go build -o dist/orchestrator ./libs/orchestrator/cmd/
+                          go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                          go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
+                          go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
+
+                      - name: Package tarball
+                        run: |
+                          cd dist
+                          tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
+                            orchestra orchestrator storage-markdown tools-features transport-stdio
+
+                      - name: Upload artifact
+                        uses: actions/upload-artifact@v4
+                        with:
+                          name: orchestra-${{ matrix.goos }}-${{ matrix.goarch }}
+                          path: dist/orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+                  release:
+                    needs: build
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/download-artifact@v4
+                        with:
+                          path: artifacts
+                          merge-multiple: true
+
+                      - name: Create GitHub Release
+                        uses: softprops/action-gh-release@v2
+                        with:
+                          generate_release_notes: true
+                          files: artifacts/*.tar.gz
+
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              url = pkg['source']['url']
+                              path = pkg['path']
+                              version = pkg['version']
+                              print(f'git clone --depth 1 --branch {version} {url} {path}')
+                          " | sh
+
+                      - name: Run unit tests
+                        run: |
+                          python3 -c "
+                          import json
+                          lock = json.load(open('orchestra.lock'))
+                          for pkg in lock['packages']:
+                              if pkg['type'] not in ('proto', 'lib', 'cli'):
+                                  print(pkg['path'])
+                              elif pkg['type'] == 'lib':
+                                  print(pkg['path'])
+                          " | while read path; do
+                            echo "go test ./${path}/... -v"
+                            go test "./${path}/..." -v
+                          done
+            structuredPatch:
+                - lines:
+                    - '           go-version: ''1.23'''
+                    - ' '
+                    - '       - name: Install dependencies'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              url = pkg[''source''][''url'']'
+                    - '-              path = pkg[''path'']'
+                    - '-              version = pkg[''version'']'
+                    - '-              print(f''git clone --depth 1 --branch {version} {url} {path}'')'
+                    - '-          " | sh'
+                    - '+        run: python3 -c "import json;[__import__(''subprocess'').run([''git'',''clone'',''--depth'',''1'',''--branch'',p[''version''],p[''source''][''url''],p[''path'']],check=True) for p in json.load(open(''orchestra.lock''))[''packages'']]"'
+                    - ' '
+                    - '       - name: Build all binaries'
+                    - '         env:'
+                  newLines: 7
+                  newStart: 33
+                  oldLines: 16
+                  oldStart: 33
+                - lines:
+                    - '           go-version: ''1.23'''
+                    - ' '
+                    - '       - name: Install dependencies'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              url = pkg[''source''][''url'']'
+                    - '-              path = pkg[''path'']'
+                    - '-              version = pkg[''version'']'
+                    - '-              print(f''git clone --depth 1 --branch {version} {url} {path}'')'
+                    - '-          " | sh'
+                    - '+        run: python3 -c "import json;[__import__(''subprocess'').run([''git'',''clone'',''--depth'',''1'',''--branch'',p[''version''],p[''source''][''url''],p[''path'']],check=True) for p in json.load(open(''orchestra.lock''))[''packages'']]"'
+                    - ' '
+                    - '       - name: Run unit tests'
+                    - '-        run: |'
+                    - '-          python3 -c "'
+                    - '-          import json'
+                    - '-          lock = json.load(open(''orchestra.lock''))'
+                    - '-          for pkg in lock[''packages'']:'
+                    - '-              if pkg[''type''] not in (''proto'', ''lib'', ''cli''):'
+                    - '-                  print(pkg[''path''])'
+                    - '-              elif pkg[''type''] == ''lib'':'
+                    - '-                  print(pkg[''path''])'
+                    - '-          " | while read path; do'
+                    - '-            echo "go test ./${path}/... -v"'
+                    - '-            go test "./${path}/..." -v'
+                    - '-          done'
+                    - '+        run: python3 -c "import json;[print(p[''path'']) for p in json.load(open(''orchestra.lock''))[''packages''] if p[''type''] not in (''proto'',''cli'')]" | while read path; do go test "./${path}/..." -v; done'
+                  newLines: 7
+                  newStart: 90
+                  oldLines: 28
+                  oldStart: 99
+            type: update
+        tool_use_id: toolu_01FHsdAF1BQVnvRYDp3djX6H
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:21:36Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Bash
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            command: |-
+                # Test the clone command generation (dry run - just print, don't execute)
+                python3 -c "import json;[print(f\"git clone --depth 1 --branch {p['version']} {p['source']['url']} {p['path']}\") for p in json.load(open('orchestra.lock'))['packages']]" 2>&1
+            description: Test the python3 one-liner produces correct clone commands
+        tool_name: Bash
+        tool_response:
+            interrupted: false
+            isImage: false
+            noOutputExpected: false
+            stderr: ""
+            stdout: |-
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/proto.git libs/proto
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/gen-go.git libs/gen-go
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/sdk-go.git libs/sdk-go
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/orchestrator.git libs/orchestrator
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/plugin-storage-markdown.git libs/plugin-storage-markdown
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/plugin-tools-features.git libs/plugin-tools-features
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/plugin-transport-stdio.git libs/plugin-transport-stdio
+                git clone --depth 1 --branch v0.1.0 https://github.com/orchestra-mcp/cli.git libs/cli
+        tool_use_id: toolu_014Mrf3Dip9nniykgeFuPa6u
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:21:43Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Bash
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            command: python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto",)]' 2>&1
+            description: Test vet path with 'not in' syntax
+        tool_name: Bash
+        tool_response:
+            interrupted: false
+            isImage: false
+            noOutputExpected: false
+            stderr: ""
+            stdout: |-
+                libs/gen-go
+                libs/sdk-go
+                libs/orchestrator
+                libs/plugin-storage-markdown
+                libs/plugin-tools-features
+                libs/plugin-transport-stdio
+                libs/cli
+        tool_use_id: toolu_01YFfFozi7eE6UteZyx7jFkT
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:22:07Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Edit
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            file_path: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+            new_string: if p['type'] not in ('proto',)
+            old_string: if p['type']!='proto'
+            replace_all: true
+        tool_name: Edit
+        tool_response:
+            filePath: /Users/fadymondy/Sites/orchestra-agents/.github/workflows/ci.yml
+            newString: if p['type'] not in ('proto',)
+            oldString: if p['type']!='proto'
+            originalFile: |
+                name: CI
+
+                on:
+                  push:
+                    branches: [master, main]
+                  pull_request:
+                    branches: [master, main]
+
+                jobs:
+                  test:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Build all binaries
+                        run: make build
+
+                      - name: Run unit tests
+                        run: make test-unit
+
+                      - name: Run E2E tests
+                        run: make test-e2e
+
+                  lint:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                      - uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.23'
+
+                      - name: Install dependencies
+                        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
+
+                      - name: Vet
+                        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type']!='proto']" | while read path; do go vet "./${path}/..."; done
+            replaceAll: true
+            structuredPatch:
+                - lines:
+                    - '         run: python3 -c "import json;[__import__(''subprocess'').run([''git'',''clone'',''--depth'',''1'',''--branch'',p[''version''],p[''source''][''url''],p[''path'']],check=True) for p in json.load(open(''orchestra.lock''))[''packages'']]"'
+                    - ' '
+                    - '       - name: Vet'
+                    - '-        run: python3 -c "import json;[print(p[''path'']) for p in json.load(open(''orchestra.lock''))[''packages''] if p[''type'']!=''proto'']" | while read path; do go vet "./${path}/..."; done'
+                    - '+        run: python3 -c "import json;[print(p[''path'']) for p in json.load(open(''orchestra.lock''))[''packages''] if p[''type''] not in (''proto'',)]" | while read path; do go vet "./${path}/..."; done'
+                  newLines: 4
+                  newStart: 39
+                  oldLines: 4
+                  oldStart: 39
+            userModified: false
+        tool_use_id: toolu_01NMQt8CHq7FySYFGeZ8ZKJs
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:22:12Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Bash
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            command: make build 2>&1 && echo "---" && make test-unit 2>&1 | tail -3
+            description: Final build and test
+            timeout: 120000
+        tool_name: Bash
+        tool_response:
+            interrupted: false
+            isImage: false
+            noOutputExpected: false
+            stderr: ""
+            stdout: |-
+                go build -o bin/orchestrator ./libs/orchestrator/cmd/
+                go build -o bin/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                go build -o bin/tools-features ./libs/plugin-tools-features/cmd/
+                go build -o bin/transport-stdio ./libs/plugin-transport-stdio/cmd/
+                go build -ldflags "-X github.com/orchestra-mcp/cli/internal.Version=b44138d-dirty -X github.com/orchestra-mcp/cli/internal.Commit=b44138d -X github.com/orchestra-mcp/cli/internal.Date=2026-02-27T07:22:21Z" -o bin/orchestra ./libs/cli/
+                ---
+                --- PASS: TestToolsListNetworkError (0.00s)
+                PASS
+                ok  	github.com/orchestra-mcp/plugin-transport-stdio/internal	(cached)
+        tool_use_id: toolu_01Sw6JZ3ihLHFCaAogXYRCUA
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:22:23Z"
+    - event_type: Stop
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: Stop
+        last_assistant_message: 'Fixed. The root cause was **Python indentation inside YAML `run: |` blocks** — the leading spaces from YAML indentation became part of the Python code, causing `IndentationError`. The fix: use single-line Python one-liners that don''t have any indentation sensitivity.'
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        stop_hook_active: false
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:22:27Z"

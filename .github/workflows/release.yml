@@ -33,16 +33,7 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        run: |
-          python3 -c "
-          import json
-          lock = json.load(open('orchestra.lock'))
-          for pkg in lock['packages']:
-              url = pkg['source']['url']
-              path = pkg['path']
-              version = pkg['version']
-              print(f'git clone --depth 1 --branch {version} {url} {path}')
-          " | sh
+        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
 
       - name: Build all binaries
         env:
@@ -99,28 +90,7 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        run: |
-          python3 -c "
-          import json
-          lock = json.load(open('orchestra.lock'))
-          for pkg in lock['packages']:
-              url = pkg['source']['url']
-              path = pkg['path']
-              version = pkg['version']
-              print(f'git clone --depth 1 --branch {version} {url} {path}')
-          " | sh
+        run: python3 -c "import json;[__import__('subprocess').run(['git','clone','--depth','1','--branch',p['version'],p['source']['url'],p['path']],check=True) for p in json.load(open('orchestra.lock'))['packages']]"
 
       - name: Run unit tests
-        run: |
-          python3 -c "
-          import json
-          lock = json.load(open('orchestra.lock'))
-          for pkg in lock['packages']:
-              if pkg['type'] not in ('proto', 'lib', 'cli'):
-                  print(pkg['path'])
-              elif pkg['type'] == 'lib':
-                  print(pkg['path'])
-          " | while read path; do
-            echo "go test ./${path}/... -v"
-            go test "./${path}/..." -v
-          done
+        run: python3 -c "import json;[print(p['path']) for p in json.load(open('orchestra.lock'))['packages'] if p['type'] not in ('proto','cli')]" | while read path; do go test "./${path}/..." -v; done
