@@ -189,11 +189,11 @@ if [[ -d "$FEATURES_DIR" ]]; then
         cat "$FIRST_FEAT"
         echo ""
 
-        # Verify it contains META block.
-        if grep -q "META" "$FIRST_FEAT"; then
-            echo "PASS: Feature file contains META block"
+        # Verify it contains YAML frontmatter (--- delimiters with metadata).
+        if grep -q "^---" "$FIRST_FEAT"; then
+            echo "PASS: Feature file contains YAML frontmatter"
         else
-            echo "FAIL: Feature file missing META block"
+            echo "FAIL: Feature file missing YAML frontmatter"
             exit 1
         fi
     else

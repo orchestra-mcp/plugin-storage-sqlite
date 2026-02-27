@@ -1,436 +1,6 @@
 events:
     - event_type: PostToolUse
       session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-      tool_name: Read
-      data:
-        cwd: /Users/fadymondy/Sites/orchestra-agents
-        hook_event_name: PostToolUse
-        permission_mode: acceptEdits
-        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-        tool_input:
-            file_path: /Users/fadymondy/Sites/orchestra-agents/CLAUDE.md
-            limit: 35
-            offset: 148
-        tool_name: Read
-        tool_response:
-            file:
-                content: |-
-                    Five apps share `@orchestra/shared` (types, stores, hooks, API client) and `@orchestra/ui` (shadcn/ui components, Tailwind CSS v4 theme). Platform-specific code stays in each app directory.
-
-                    ## Skills (Slash Commands)
-
-                    Every skill is both auto-activated by context AND available as a `/command`. Use `/skill-name` to manually load a skill's patterns and conventions.
-
-                    | Command | Domain | Technologies |
-                    |---------|--------|-------------|
-                    | `/go-backend` | Go API layer | Fiber v3, GORM, JWT, asynq, gocron, stripe-go, zerolog, go-mail, validator |
-                    | `/rust-engine` | Rust engine | Tonic gRPC, Tree-sitter, Tantivy, tower-lsp, ropey, dashmap, ring, rusqlite |
-                    | `/typescript-react` | Frontend | React, TypeScript, Zustand, React Query, Axios, React Router, Monaco, xterm.js, Vite |
-                    | `/ui-design` | Design system | shadcn/ui, Tailwind CSS v4, Lucide icons, themes, responsive, accessibility |
-                    | `/database-sync` | Data layer | PostgreSQL, pgvector, SQLite, Redis, sync protocol, migrations |
-                    | `/proto-grpc` | Contracts | Protobuf, Buf, tonic-build, Go/Rust code generation |
-                    | `/chrome-extension` | Browser | Chrome Manifest V3, service worker, content scripts, side panel |
-                    | `/wails-desktop` | Desktop | Wails v3, Go-React bindings, system tray, window management |
-                    | `/react-native-mobile` | Mobile | React Native, WatermelonDB, React Navigation, offline sync |
-                    | `/native-widgets` | OS Widgets | macOS WidgetKit, Windows Adaptive Cards, Linux GNOME/KDE |
-                    | `/macos-integration` | macOS | CGo, Spotlight, Keychain, iCloud, Notifications, file associations |
-                    | `/native-extensions` | Extension API | Lifecycle, commands, editor, AI, filesystem, UI, permissions, sandbox |
-                    | `/raycast-compat` | Raycast shim | List/Detail/Form/Action components, ~95% compatibility |
-                    | `/vscode-compat` | VS Code shim | LSP/DAP, themes, snippets, grammars, ~85% compatibility |
-                    | `/extension-marketplace` | Marketplace | Publishing, search, CLI, versioning, reviews, auto-updates |
-                    | `/ai-agentic` | AI/LLM | Anthropic SDK, OpenAI SDK, langchaingo, chromem-go, pgvector, RAG |
-                    | `/gcp-infrastructure` | Infrastructure | Cloud Run, Cloud SQL, CDN, Cloud Build, Docker, nginx, Sentry, PostHog |
-                    | `/project-manager` | Process | Sprint planning, feature breakdown, ADRs, cross-team coordination |
-                    | `/docs` | Documentation | Architecture, plugin system, API references, package relationships |
-                    | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |
-
-                    ## Agents
-
-                    Specialized agents in `.claude/agents/` auto-delegate based on task context. See [AGENTS.md](AGENTS.md) for full details.
-
-                    | Agent | Role |
-                filePath: /Users/fadymondy/Sites/orchestra-agents/CLAUDE.md
-                numLines: 35
-                startLine: 148
-                totalLines: 288
-            type: text
-        tool_use_id: toolu_01CH7LEYiX6xBwchW5tejWVQ
-        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
-      timestamp: "2026-02-27T07:03:42Z"
-    - event_type: PostToolUse
-      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-      tool_name: Edit
-      data:
-        cwd: /Users/fadymondy/Sites/orchestra-agents
-        hook_event_name: PostToolUse
-        permission_mode: acceptEdits
-        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-        tool_input:
-            file_path: /Users/fadymondy/Sites/orchestra-agents/CLAUDE.md
-            new_string: |-
-                | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |
-                | `/plugin-generator` | Plugin scaffolding | new-plugin.sh, tools/storage/transport templates, SDK patterns |
-            old_string: '| `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |'
-            replace_all: false
-        tool_name: Edit
-        tool_response:
-            filePath: /Users/fadymondy/Sites/orchestra-agents/CLAUDE.md
-            newString: |-
-                | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |
-                | `/plugin-generator` | Plugin scaffolding | new-plugin.sh, tools/storage/transport templates, SDK patterns |
-            oldString: '| `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |'
-            originalFile: |
-                # CLAUDE.md
-
-                This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-                ## Project Overview
-
-                Orchestra MCP is an AI-agentic IDE targeting 5 platforms: Desktop (Wails), Chrome Extension, Mobile iOS, Mobile Android, and Web Dashboard. Built with Go (Fiber v3 + GORM), Rust (Tonic gRPC + Tree-sitter + Tantivy), and React/TypeScript (pnpm + Turborepo + Zustand).
-
-                The old Laravel codebase is preserved at `old-ref/` for reference. All new development happens in the repo root.
-
-                ## Key Commands
-
-                ```bash
-                # Development
-                make dev                 # Start Go backend + Rust engine + all frontends
-                make dev-go              # Go server only (air hot-reload)
-                make dev-rust            # Rust engine only (cargo watch)
-                make dev-frontend        # All frontends via Turborepo
-
-                # Build
-                make build               # Build everything (Go + Rust + MCP + frontends)
-                make build-go            # Go server binary -> bin/server
-                make build-rust          # Rust engine binary
-                make build-mcp           # MCP plugin binary -> bin/orchestra-mcp
-                make build-frontend      # All frontend apps
-
-                # MCP Plugin
-                make mcp-build           # Build MCP plugin binary
-                make mcp-init            # Initialize MCP in current project
-                make mcp-start           # Start MCP stdio server
-
-                # Install & Test
-                make install             # Install all deps (Go + Rust + pnpm)
-                make test                # All tests (Go + MCP + Rust + Frontend)
-                make clean               # Remove build artifacts
-
-                # Proto (generate Go + Rust + TypeScript from .proto files)
-                make proto
-
-                # Add a shadcn component
-                cd resources/ui && npx shadcn@latest add {component}
-                ```
-
-                ## Project Structure
-
-                ```
-                orchestra-mcp/
-                ├── app/                      # Go backend (Fiber + GORM)
-                │   ├── handlers/             # HTTP handlers (controllers)
-                │   ├── models/               # GORM models
-                │   ├── services/             # Business logic
-                │   ├── repositories/         # Data access
-                │   ├── middleware/            # Fiber middleware
-                │   ├── routes/               # Route registration
-                │   ├── plugins/              # Plugin runtime (8 files — the foundation)
-                │   │   ├── contracts.go      # Plugin interface + 15 Has* capability interfaces
-                │   │   ├── manager.go        # PluginManager with topological sort
-                │   │   ├── context.go        # PluginContext with DI
-                │   │   ├── manifest.go       # PluginManifest
-                │   │   ├── registry.go       # ServiceRegistry (thread-safe DI)
-                │   │   ├── contributes.go    # ContributesRegistry
-                │   │   ├── features.go       # FeatureManager (feature flags)
-                │   │   └── loader.go         # PluginLoader (auto-discovery)
-                │   └── gen/proto/            # Generated protobuf Go code
-                ├── config/                   # Go configuration
-                │   └── plugins.go            # Plugin registry config
-                ├── plugins/                  # ALL PLUGINS (each is standalone)
-                │   └── mcp/                  # MCP Plugin — first plugin (85 tools)
-                │       ├── go.mod            # Standalone module
-                │       ├── config/mcp.go     # McpConfig
-                │       ├── providers/        # Plugin registration (bridges to app/plugins)
-                │       ├── src/
-                │       │   ├── cmd/main.go   # CLI entry -> orchestra-mcp binary
-                │       │   ├── types/        # Type definitions (5 files)
-                │       │   ├── toon/         # TOON/YAML file parser
-                │       │   ├── workflow/     # State machine transitions
-                │       │   ├── helpers/      # Shared utilities (5 files)
-                │       │   ├── transport/    # MCP stdio JSON-RPC server
-                │       │   ├── tools/        # All 85 MCP tools
-                │       │   └── bootstrap/    # Workspace init command
-                │       └── resources/        # Bundled skills + agents
-                ├── cmd/server/main.go        # Go HTTP server entry point
-                ├── engine/                   # Rust engine (gRPC)
-                │   └── src/                  # Tree-sitter, Tantivy, tower-lsp, rusqlite
-                ├── proto/                    # Shared protobuf definitions
-                ├── database/migrations/      # PostgreSQL SQL migrations
-                ├── resources/                # All frontends (pnpm monorepo)
-                │   ├── shared/               # @orchestra/shared
-                │   ├── ui/                   # @orchestra/ui (shadcn/ui)
-                │   ├── extension/            # Chrome Extension
-                │   ├── dashboard/            # Web Dashboard
-                │   ├── desktop/              # Wails Desktop UI
-                │   └── mobile/               # React Native
-                ├── old-ref/                  # Old Laravel codebase (reference only)
-                ├── Makefile                  # Central command runner
-                ├── go.mod                    # Root Go module
-                └── pnpm-workspace.yaml       # Frontend workspace config
-                ```
-
-                ## Architecture
-
-                ### Plugin System (Component-First)
-
-                Everything is a plugin. The plugin runtime at `app/plugins/` provides:
-                - **Plugin interface** with capability contracts (Has* interfaces)
-                - **PluginManager** with topological dependency sort and boot sequence
-                - **FeatureManager** for runtime feature flags — disable any feature by turning off its plugin
-                - **ServiceRegistry** for plugin-scoped dependency injection
-                - **ContributesRegistry** for VS Code-style contributions (commands, menus, settings)
-
-                Each plugin is a standalone Go module with its own `go.mod`, pushable as a separate GitHub repo. Plugin folder convention: `config/`, `providers/`, `src/`, `resources/`, `README.md`.
-
-                ### MCP Plugin (Pure Go, 85 tools)
-
-                The first plugin at `plugins/mcp/`. Provides project management tools via MCP protocol:
-                - **Build**: `cd plugins/mcp && go build -o orchestra-mcp ./src/cmd/`
-                - **Run**: `orchestra-mcp --workspace .` (stdio JSON-RPC)
-                - **Init**: `orchestra-mcp init --workspace .` (creates .mcp.json, .projects/, .claude/, CLAUDE.md, AGENTS.md, CONTEXT.md)
-                - **Packages**: `types/`, `toon/`, `workflow/`, `helpers/`, `transport/`, `tools/`, `engine/`, `bootstrap/`
-                - **Workflow**: 13-state lifecycle (backlog → todo → in-progress → ready-for-testing → in-testing → ready-for-docs → in-docs → documented → in-review → done)
-                - **Multi-Audience PRD**: 4 audience types (business/product/technical/qa) with conditional follow-up questions, validation, agent briefings, auto-backlog generation, and reusable templates
-                - **Sprint Management**: Create/start/end sprints with auto task promotion (backlog→todo), velocity tracking, burndown charts, standup summaries, retrospectives
-                - **Parallel Agents**: `get_next_task` supports `epic_id`, `story_id`, `assignee`, `label` filters for scoped agent work
-                - **WIP Limits**: Configurable max in-progress tasks (global + per-assignee), enforced on `set_current_task`
-                - **Dependencies**: Task dependency graph with blocker/blocked-by relationships
-                - **Engine**: Optional Rust gRPC engine for vector search memory (auto-starts/stops, TOON fallback)
-                - **Extensible**: Other plugins push tools via `RegisterExternalTools()` — appears in stdio + REST
-
-                ### Three-Layer Database
-
-                - **PostgreSQL** (cloud) — Source of truth. pgvector for embeddings, JSONB for settings, tsvector for full-text search, partitioned sync_log
-                - **SQLite** (local) — Offline support on Desktop and Mobile. Managed by Rust engine (rusqlite) and WatermelonDB (React Native)
-                - **Redis** — Real-time pub/sub for sync, session cache, rate limiting
-
-                ### Sync System
-
-                All syncable entities use UUID primary keys and include `version`, `created_at`, `updated_at`, `deleted_at`. Changes are logged to `sync_log` and published via Redis pub/sub. Clients push local changes and pull remote changes via WebSocket. Conflict resolution: last-write-wins with version vectors.
-
-                ### Go Backend (Fiber v3 + GORM)
-
-                REST API, WebSocket sync hub, job queue, auth (JWT). Architecture: Handlers → Services → Repositories. All data mutations go through SyncService to log changes.
-
-                ### Rust Engine (Tonic gRPC)
-
-                CPU-intensive operations: Tree-sitter parsing, Tantivy search indexing, file diffing, content hashing, zstd compression, AES-256-GCM encryption, local SQLite management. Go communicates with Rust via gRPC.
-
-                ### React Frontends (pnpm + Turborepo + Zustand)
-
-                Five apps share `@orchestra/shared` (types, stores, hooks, API client) and `@orchestra/ui` (shadcn/ui components, Tailwind CSS v4 theme). Platform-specific code stays in each app directory.
-
-                ## Skills (Slash Commands)
-
-                Every skill is both auto-activated by context AND available as a `/command`. Use `/skill-name` to manually load a skill's patterns and conventions.
-
-                | Command | Domain | Technologies |
-                |---------|--------|-------------|
-                | `/go-backend` | Go API layer | Fiber v3, GORM, JWT, asynq, gocron, stripe-go, zerolog, go-mail, validator |
-                | `/rust-engine` | Rust engine | Tonic gRPC, Tree-sitter, Tantivy, tower-lsp, ropey, dashmap, ring, rusqlite |
-                | `/typescript-react` | Frontend | React, TypeScript, Zustand, React Query, Axios, React Router, Monaco, xterm.js, Vite |
-                | `/ui-design` | Design system | shadcn/ui, Tailwind CSS v4, Lucide icons, themes, responsive, accessibility |
-                | `/database-sync` | Data layer | PostgreSQL, pgvector, SQLite, Redis, sync protocol, migrations |
-                | `/proto-grpc` | Contracts | Protobuf, Buf, tonic-build, Go/Rust code generation |
-                | `/chrome-extension` | Browser | Chrome Manifest V3, service worker, content scripts, side panel |
-                | `/wails-desktop` | Desktop | Wails v3, Go-React bindings, system tray, window management |
-                | `/react-native-mobile` | Mobile | React Native, WatermelonDB, React Navigation, offline sync |
-                | `/native-widgets` | OS Widgets | macOS WidgetKit, Windows Adaptive Cards, Linux GNOME/KDE |
-                | `/macos-integration` | macOS | CGo, Spotlight, Keychain, iCloud, Notifications, file associations |
-                | `/native-extensions` | Extension API | Lifecycle, commands, editor, AI, filesystem, UI, permissions, sandbox |
-                | `/raycast-compat` | Raycast shim | List/Detail/Form/Action components, ~95% compatibility |
-                | `/vscode-compat` | VS Code shim | LSP/DAP, themes, snippets, grammars, ~85% compatibility |
-                | `/extension-marketplace` | Marketplace | Publishing, search, CLI, versioning, reviews, auto-updates |
-                | `/ai-agentic` | AI/LLM | Anthropic SDK, OpenAI SDK, langchaingo, chromem-go, pgvector, RAG |
-                | `/gcp-infrastructure` | Infrastructure | Cloud Run, Cloud SQL, CDN, Cloud Build, Docker, nginx, Sentry, PostHog |
-                | `/project-manager` | Process | Sprint planning, feature breakdown, ADRs, cross-team coordination |
-                | `/docs` | Documentation | Architecture, plugin system, API references, package relationships |
-                | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |
-
-                ## Agents
-
-                Specialized agents in `.claude/agents/` auto-delegate based on task context. See [AGENTS.md](AGENTS.md) for full details.
-
-                | Agent | Role |
-                |-------|------|
-                | `quic-protocol` | QUIC transport, mTLS, Protobuf framing, wire protocol |
-                | `go-architect` | Go orchestrator, plugin SDK, Go plugins (quic-go) |
-                | `rust-engineer` | Rust plugins (quinn, Tree-sitter, Tantivy, rusqlite) |
-                | `swift-plugin` | Swift/macOS/iOS plugins (Network.framework, SwiftUI, WidgetKit) |
-                | `kotlin-plugin` | Kotlin/Android plugins (Netty QUIC, Jetpack Compose) |
-                | `csharp-plugin` | C#/Windows plugins (System.Net.Quic, WinUI 3) |
-                | `frontend-dev` | React/TypeScript across all 5 platforms |
-                | `ui-ux-designer` | shadcn/ui, Tailwind, accessibility, responsive |
-                | `dba` | Cross-database coordination, sync protocol |
-                | `postgres-dba` | PostgreSQL (pgvector, JSONB, tsvector, partitioning) |
-                | `sqlite-engineer` | SQLite (rusqlite, go-sqlite3, WatermelonDB) |
-                | `redis-engineer` | Redis (pub/sub, Streams, caching, rate limiting) |
-                | `clickhouse-engineer` | ClickHouse (analytics, metrics, OLAP) |
-                | `lancedb-engineer` | LanceDB (vector search, embeddings, AI memory) |
-                | `gtk-plugin` | Linux desktop (GTK4, libadwaita, Flatpak) |
-                | `mobile-dev` | React Native, WatermelonDB, offline sync |
-                | `scrum-master` | Feature planning, cyclical delivery, WIP limits, ADRs, coordination |
-                | `widget-engineer` | Native OS widgets (Swift/C#/JS/QML) |
-                | `platform-engineer` | macOS CGo, Spotlight, Keychain, iCloud |
-                | `extension-architect` | Extension system (native, Raycast, VS Code, marketplace) |
-                | `ai-engineer` | AI chat, RAG, agents, embeddings, vector search |
-                | `devops` | Docker, GCP, CI/CD, monitoring, deployment |
-                | `qa-go` | Go testing (go test, testify, httptest, plugin tests) |
-                | `qa-rust` | Rust testing (cargo test, tokio::test, tempfile) |
-                | `qa-node` | Node/React testing (vitest, @testing-library, component/store tests) |
-                | `qa-playwright` | E2E browser testing (Playwright, page objects, visual regression) |
-
-                ## User Interaction Rule (MANDATORY)
-
-                **ALWAYS use the `AskUserQuestion` tool when you need user input.** Never print questions as plain text and wait for a response. The scrum-master agent and project-manager skill must use `AskUserQuestion` for:
-                - PRD session questions (present MCP question via `AskUserQuestion`, then pass answer to `answer_prd_question`)
-                - Sprint planning decisions (sprint goal, dates, scope)
-                - Architecture and design choices
-                - Priority and scope decisions
-                - Any clarification or confirmation needed from the user
-
-                ## Sub-Agent Orchestration Rules
-
-                Sub-agents (launched via the `Task` tool) do **NOT** have access to MCP tools. They cannot call `advance_task`, `set_current_task`, or any workflow tools. The main agent must own the full task lifecycle.
-
-                ### Rules
-
-                1. **Sub-agents are for code writing ONLY** — Use sub-agents only during the `in-progress` phase to write code. They return code results, nothing more.
-                2. **Main agent owns the lifecycle** — The main agent (you) must handle ALL gate transitions: test, document, review. Never delegate gate work to a sub-agent that can't call MCP tools.
-                3. **One task at a time** — Work one task through its FULL lifecycle (in-progress → done) before starting the next. Never batch multiple tasks in parallel through gates.
-                4. **Summarize sub-agent results** — After a sub-agent returns, summarize what it built to the user before advancing. The user must see what happened.
-                5. **Never mark done without gates** — After a sub-agent writes code, YOU must: run tests (Gate 1), verify coverage (Gate 2), write docs (Gate 3), review quality (Gate 4). Each gate needs real evidence.
-
-                ### Correct Pattern
-
-                ```
-                1. set_current_task(task_id)                    → in-progress
-                2. Delegate code writing to sub-agent (Task tool)
-                3. Sub-agent returns → summarize results to user
-                4. Run tests yourself or delegate to qa-* agent
-                5. advance_task(evidence="test results...")     → ready-for-testing [GATE 1]
-                6. advance_task                                  → in-testing
-                7. Verify coverage and edge cases
-                8. advance_task(evidence="coverage...")          → ready-for-docs [GATE 2]
-                9. advance_task                                  → in-docs
-                10. Write documentation yourself
-                11. advance_task(evidence="docs...")             → documented [GATE 3]
-                12. advance_task                                 → in-review
-                13. Review code quality yourself
-                14. advance_task(evidence="review...")           → done [GATE 4]
-                15. Move to next task
-                ```
-
-                ### Anti-Patterns (NEVER DO)
-
-                - Spawning 5 sub-agents in parallel, then batch-advancing all 5 tasks to done
-                - Letting a sub-agent "handle everything" including testing and docs
-                - Advancing through gates without providing real evidence
-                - Starting the next task before the current one reaches done
-
-                ## Conventions
-
-                ### Go
-                - Handler methods: `Index`, `Show`, `Store`, `Update`, `Delete`
-                - Services contain business logic; repositories are pure data access
-                - All entities use UUID primary keys with `SyncModel` base
-                - Error responses: `{"error": "code", "message": "...", "details": {}}`
-                - Always pass `context.Context` through the call chain
-                - Use interfaces for services (testability)
-
-                ### Rust
-                - Use `thiserror` for typed errors, `anyhow` for application errors
-                - Never use `unwrap()` in production — use `?` operator
-                - Use `tokio::task::spawn_blocking` for CPU-heavy synchronous work
-                - Proto code via `tonic-build` in `build.rs` (not buf for Rust)
-                - Logging via `tracing` crate
-
-                ### TypeScript/React
-                - Import types with `type` keyword
-                - Zustand stores: separate `State` and `Actions` interfaces
-                - Use `@orchestra/*` aliases, never relative `../../../` cross-package
-                - All API responses typed with `ApiResponse<T>`
-                - Functional components only, `FC` for typing
-
-                ### Database
-                - All syncable entities: UUID PK + version + timestamps + soft delete
-                - PostgreSQL: `TIMESTAMPTZ`; SQLite: ISO 8601 strings
-                - JSONB for flexible metadata, never for queried fields
-                - Never store file contents in DB — use content_hash + object storage
-            replaceAll: false
-            structuredPatch:
-                - lines:
-                    - ' | `/project-manager` | Process | Sprint planning, feature breakdown, ADRs, cross-team coordination |'
-                    - ' | `/docs` | Documentation | Architecture, plugin system, API references, package relationships |'
-                    - ' | `/qa-testing` | QA/Testing | Multi-agent: go test, cargo test, vitest, Playwright, coverage, CI |'
-                    - +| `/plugin-generator` | Plugin scaffolding | new-plugin.sh, tools/storage/transport templates, SDK patterns |
-                    - ' '
-                    - ' ## Agents'
-                    - ' '
-                  newLines: 7
-                  newStart: 174
-                  oldLines: 6
-                  oldStart: 174
-            userModified: false
-        tool_use_id: toolu_01VftBckt4giexuEC8ykXe9D
-        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
-      timestamp: "2026-02-27T07:03:45Z"
-    - event_type: Stop
-      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-      data:
-        cwd: /Users/fadymondy/Sites/orchestra-agents
-        hook_event_name: Stop
-        last_assistant_message: Done. Added `/plugin-generator` to the CLAUDE.md skills table. The skill is fully set up — the skill file at [.claude/skills/plugin-generator/SKILL.md](.claude/skills/plugin-generator/SKILL.md) is created and it's now referenced in the skills table in [CLAUDE.md](CLAUDE.md).
-        permission_mode: acceptEdits
-        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-        stop_hook_active: false
-        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
-      timestamp: "2026-02-27T07:03:50Z"
-    - event_type: PostToolUse
-      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-      tool_name: Read
-      data:
-        cwd: /Users/fadymondy/Sites/orchestra-agents
-        hook_event_name: PostToolUse
-        permission_mode: acceptEdits
-        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
-        tool_input:
-            file_path: /Users/fadymondy/Sites/orchestra-agents/go.work
-        tool_name: Read
-        tool_response:
-            file:
-                content: |
-                    go 1.23
-
-                    use (
-                    	./libs/cli
-                    	./libs/gen-go
-                    	./libs/sdk-go
-                    	./libs/orchestrator
-                    	./libs/plugin-storage-markdown
-                    	./libs/plugin-tools-features
-                    	./libs/plugin-transport-stdio
-                    )
-                filePath: /Users/fadymondy/Sites/orchestra-agents/go.work
-                numLines: 12
-                startLine: 1
-                totalLines: 12
-            type: text
-        tool_use_id: toolu_01VfvFYBLT8kJGDjzPH2ndt9
-        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
-      timestamp: "2026-02-27T07:04:05Z"
-    - event_type: PostToolUse
-      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
       tool_name: Bash
       data:
         cwd: /Users/fadymondy/Sites/orchestra-agents
@@ -13702,3 +13272,678 @@ events:
         stop_hook_active: false
         transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
       timestamp: "2026-02-27T07:25:11Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Read
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            file_path: /Users/fadymondy/Sites/orchestra-agents/scripts/test-e2e.sh
+        tool_name: Read
+        tool_response:
+            file:
+                content: |
+                    #!/usr/bin/env bash
+                    #
+                    # End-to-end test for Phase 1 of the Orchestra Plugin Host.
+                    #
+                    # Flow: transport.stdio → orchestrator → tools.features → orchestrator → storage.markdown → disk
+                    #
+                    # Prerequisites: make build (all binaries in bin/)
+                    #
+                    set -euo pipefail
+
+                    ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+                    BIN="$ROOT/bin"
+
+                    # Use a temporary workspace so we don't pollute the repo.
+                    WORKSPACE="$(mktemp -d)"
+                    CERTS_DIR="$WORKSPACE/.certs"
+
+                    # PID tracking for cleanup.
+                    ORCH_PID=""
+
+                    cleanup() {
+                        echo "--- Cleaning up ---"
+                        if [[ -n "$ORCH_PID" ]]; then
+                            kill "$ORCH_PID" 2>/dev/null || true
+                            wait "$ORCH_PID" 2>/dev/null || true
+                        fi
+                        rm -rf "$WORKSPACE"
+                        echo "--- Done ---"
+                    }
+                    trap cleanup EXIT
+
+                    echo "=== Orchestra E2E Test ==="
+                    echo "Workspace: $WORKSPACE"
+                    echo "Certs dir: $CERTS_DIR"
+
+                    # Write a plugins.yaml for this test with absolute paths.
+                    cat > "$WORKSPACE/plugins.yaml" <<YAML
+                    listen_addr: "localhost:0"
+                    certs_dir: "$CERTS_DIR"
+                    plugins:
+                      - id: storage.markdown
+                        binary: $BIN/storage-markdown
+                        enabled: true
+                        provides_storage:
+                          - markdown
+                        args:
+                          - "--workspace=$WORKSPACE"
+                      - id: tools.features
+                        binary: $BIN/tools-features
+                        enabled: true
+                    YAML
+
+                    echo ""
+                    echo "--- Step 1: Start orchestrator ---"
+
+                    # Start orchestrator in background, capture stderr to read the listen address.
+                    ORCH_LOG="$WORKSPACE/orchestrator.log"
+                    "$BIN/orchestrator" --config "$WORKSPACE/plugins.yaml" > /dev/null 2>"$ORCH_LOG" &
+                    ORCH_PID=$!
+
+                    # Wait for orchestrator to be ready (it logs "started QUIC server" or plugin registrations).
+                    echo "Waiting for orchestrator (pid=$ORCH_PID)..."
+                    READY=false
+                    for i in $(seq 1 30); do
+                        sleep 1
+                        if grep -q "registered and booted" "$ORCH_LOG" 2>/dev/null; then
+                            READY=true
+                            break
+                        fi
+                        # Check if the process is still alive.
+                        if ! kill -0 "$ORCH_PID" 2>/dev/null; then
+                            echo "FAIL: Orchestrator exited prematurely"
+                            cat "$ORCH_LOG"
+                            exit 1
+                        fi
+                    done
+
+                    if [[ "$READY" != "true" ]]; then
+                        echo "FAIL: Orchestrator did not become ready in 30 seconds"
+                        cat "$ORCH_LOG"
+                        exit 1
+                    fi
+
+                    echo "Orchestrator is ready."
+
+                    # Extract the listen address from the orchestrator log.
+                    # The orchestrator logs "QUIC server listening on <addr>"
+                    ORCH_ADDR=$(grep -o 'listening on [^ ]*' "$ORCH_LOG" | head -1 | awk '{print $NF}')
+                    if [[ -z "$ORCH_ADDR" ]]; then
+                        # Fallback: try to parse from config (localhost:0 means random port).
+                        # If we can't find it, use the default.
+                        echo "WARNING: Could not extract orchestrator address from log, trying to find it..."
+                        ORCH_ADDR=$(grep -o 'localhost:[0-9]*' "$ORCH_LOG" | tail -1)
+                    fi
+
+                    if [[ -z "$ORCH_ADDR" ]]; then
+                        echo "FAIL: Could not determine orchestrator listen address"
+                        cat "$ORCH_LOG"
+                        exit 1
+                    fi
+
+                    echo "Orchestrator listening at: $ORCH_ADDR"
+
+                    echo ""
+                    echo "--- Step 2: Send MCP initialize ---"
+
+                    INIT_REQ='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-test","version":"0.1.0"}}}'
+                    INIT_RESP=$(echo "$INIT_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                    echo "Response: $INIT_RESP"
+
+                    if echo "$INIT_RESP" | grep -q '"protocolVersion"'; then
+                        echo "PASS: initialize returned protocolVersion"
+                    else
+                        echo "FAIL: initialize did not return protocolVersion"
+                        exit 1
+                    fi
+
+                    echo ""
+                    echo "--- Step 3: Send tools/list ---"
+
+                    LIST_REQ='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+                    LIST_RESP=$(echo "$LIST_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                    echo "Response (truncated): $(echo "$LIST_RESP" | head -c 500)"
+
+                    if echo "$LIST_RESP" | grep -q '"create_project"'; then
+                        echo "PASS: tools/list includes create_project"
+                    else
+                        echo "FAIL: tools/list does not include create_project"
+                        exit 1
+                    fi
+
+                    if echo "$LIST_RESP" | grep -q '"create_feature"'; then
+                        echo "PASS: tools/list includes create_feature"
+                    else
+                        echo "FAIL: tools/list does not include create_feature"
+                        exit 1
+                    fi
+
+                    echo ""
+                    echo "--- Step 4: Create a project ---"
+
+                    CREATE_PROJECT_REQ='{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"create_project","arguments":{"name":"test-project","description":"E2E test project"}}}'
+                    CREATE_PROJECT_RESP=$(echo "$CREATE_PROJECT_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                    echo "Response: $CREATE_PROJECT_RESP"
+
+                    if echo "$CREATE_PROJECT_RESP" | grep -q 'test-project'; then
+                        echo "PASS: create_project returned project data"
+                    else
+                        echo "FAIL: create_project did not return expected data"
+                        exit 1
+                    fi
+
+                    echo ""
+                    echo "--- Step 5: Create a feature ---"
+
+                    CREATE_FEATURE_REQ='{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"create_feature","arguments":{"project_id":"test-project","title":"Test Feature","description":"Created by E2E test","priority":"P1"}}}'
+                    CREATE_FEATURE_RESP=$(echo "$CREATE_FEATURE_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                    echo "Response: $CREATE_FEATURE_RESP"
+
+                    if echo "$CREATE_FEATURE_RESP" | grep -q 'FEAT-'; then
+                        echo "PASS: create_feature returned feature with FEAT- ID"
+                    else
+                        echo "FAIL: create_feature did not return expected data"
+                        exit 1
+                    fi
+
+                    echo ""
+                    echo "--- Step 6: Verify feature file on disk ---"
+
+                    # List the features directory.
+                    FEATURES_DIR="$WORKSPACE/.projects/test-project/features"
+                    if [[ -d "$FEATURES_DIR" ]]; then
+                        echo "Features directory exists: $FEATURES_DIR"
+                        ls -la "$FEATURES_DIR/"
+
+                        # Check at least one FEAT-*.md file exists.
+                        FEAT_FILES=$(find "$FEATURES_DIR" -name "FEAT-*.md" 2>/dev/null | wc -l | tr -d ' ')
+                        if [[ "$FEAT_FILES" -gt 0 ]]; then
+                            echo "PASS: Found $FEAT_FILES feature file(s) on disk"
+
+                            # Show the content of the first feature file.
+                            FIRST_FEAT=$(find "$FEATURES_DIR" -name "FEAT-*.md" | head -1)
+                            echo ""
+                            echo "Feature file content:"
+                            cat "$FIRST_FEAT"
+                            echo ""
+
+                            # Verify it contains META block.
+                            if grep -q "META" "$FIRST_FEAT"; then
+                                echo "PASS: Feature file contains META block"
+                            else
+                                echo "FAIL: Feature file missing META block"
+                                exit 1
+                            fi
+                        else
+                            echo "FAIL: No FEAT-*.md files found in $FEATURES_DIR"
+                            exit 1
+                        fi
+                    else
+                        echo "FAIL: Features directory does not exist at $FEATURES_DIR"
+                        ls -laR "$WORKSPACE/.projects/" 2>/dev/null || echo "No .projects directory"
+                        exit 1
+                    fi
+
+                    echo ""
+                    echo "--- Step 7: Get feature back ---"
+
+                    # Extract feature ID from the create response.
+                    FEATURE_ID=$(echo "$CREATE_FEATURE_RESP" | grep -o 'FEAT-[A-Z0-9]*' | head -1)
+                    if [[ -z "$FEATURE_ID" ]]; then
+                        echo "WARNING: Could not extract feature ID, skipping get_feature test"
+                    else
+                        GET_FEATURE_REQ="{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"get_feature\",\"arguments\":{\"project_id\":\"test-project\",\"feature_id\":\"$FEATURE_ID\"}}}"
+                        GET_FEATURE_RESP=$(echo "$GET_FEATURE_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                        echo "Response: $GET_FEATURE_RESP"
+
+                        if echo "$GET_FEATURE_RESP" | grep -q 'Test Feature'; then
+                            echo "PASS: get_feature returned correct title"
+                        else
+                            echo "FAIL: get_feature did not return expected data"
+                            exit 1
+                        fi
+                    fi
+
+                    echo ""
+                    echo "==============================="
+                    echo "  ALL E2E TESTS PASSED"
+                    echo "==============================="
+                filePath: /Users/fadymondy/Sites/orchestra-agents/scripts/test-e2e.sh
+                numLines: 234
+                startLine: 1
+                totalLines: 234
+            type: text
+        tool_use_id: toolu_01DkRpmYtGYBmBGFEMz2LYgW
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:27:54Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Edit
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            file_path: /Users/fadymondy/Sites/orchestra-agents/scripts/test-e2e.sh
+            new_string: |4-
+                        # Verify it contains YAML frontmatter (--- delimiters with metadata).
+                        if grep -q "^---" "$FIRST_FEAT"; then
+                            echo "PASS: Feature file contains YAML frontmatter"
+                        else
+                            echo "FAIL: Feature file missing YAML frontmatter"
+                            exit 1
+                        fi
+            old_string: |4-
+                        # Verify it contains META block.
+                        if grep -q "META" "$FIRST_FEAT"; then
+                            echo "PASS: Feature file contains META block"
+                        else
+                            echo "FAIL: Feature file missing META block"
+                            exit 1
+                        fi
+            replace_all: false
+        tool_name: Edit
+        tool_response:
+            filePath: /Users/fadymondy/Sites/orchestra-agents/scripts/test-e2e.sh
+            newString: |4-
+                        # Verify it contains YAML frontmatter (--- delimiters with metadata).
+                        if grep -q "^---" "$FIRST_FEAT"; then
+                            echo "PASS: Feature file contains YAML frontmatter"
+                        else
+                            echo "FAIL: Feature file missing YAML frontmatter"
+                            exit 1
+                        fi
+            oldString: |4-
+                        # Verify it contains META block.
+                        if grep -q "META" "$FIRST_FEAT"; then
+                            echo "PASS: Feature file contains META block"
+                        else
+                            echo "FAIL: Feature file missing META block"
+                            exit 1
+                        fi
+            originalFile: |
+                #!/usr/bin/env bash
+                #
+                # End-to-end test for Phase 1 of the Orchestra Plugin Host.
+                #
+                # Flow: transport.stdio → orchestrator → tools.features → orchestrator → storage.markdown → disk
+                #
+                # Prerequisites: make build (all binaries in bin/)
+                #
+                set -euo pipefail
+
+                ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+                BIN="$ROOT/bin"
+
+                # Use a temporary workspace so we don't pollute the repo.
+                WORKSPACE="$(mktemp -d)"
+                CERTS_DIR="$WORKSPACE/.certs"
+
+                # PID tracking for cleanup.
+                ORCH_PID=""
+
+                cleanup() {
+                    echo "--- Cleaning up ---"
+                    if [[ -n "$ORCH_PID" ]]; then
+                        kill "$ORCH_PID" 2>/dev/null || true
+                        wait "$ORCH_PID" 2>/dev/null || true
+                    fi
+                    rm -rf "$WORKSPACE"
+                    echo "--- Done ---"
+                }
+                trap cleanup EXIT
+
+                echo "=== Orchestra E2E Test ==="
+                echo "Workspace: $WORKSPACE"
+                echo "Certs dir: $CERTS_DIR"
+
+                # Write a plugins.yaml for this test with absolute paths.
+                cat > "$WORKSPACE/plugins.yaml" <<YAML
+                listen_addr: "localhost:0"
+                certs_dir: "$CERTS_DIR"
+                plugins:
+                  - id: storage.markdown
+                    binary: $BIN/storage-markdown
+                    enabled: true
+                    provides_storage:
+                      - markdown
+                    args:
+                      - "--workspace=$WORKSPACE"
+                  - id: tools.features
+                    binary: $BIN/tools-features
+                    enabled: true
+                YAML
+
+                echo ""
+                echo "--- Step 1: Start orchestrator ---"
+
+                # Start orchestrator in background, capture stderr to read the listen address.
+                ORCH_LOG="$WORKSPACE/orchestrator.log"
+                "$BIN/orchestrator" --config "$WORKSPACE/plugins.yaml" > /dev/null 2>"$ORCH_LOG" &
+                ORCH_PID=$!
+
+                # Wait for orchestrator to be ready (it logs "started QUIC server" or plugin registrations).
+                echo "Waiting for orchestrator (pid=$ORCH_PID)..."
+                READY=false
+                for i in $(seq 1 30); do
+                    sleep 1
+                    if grep -q "registered and booted" "$ORCH_LOG" 2>/dev/null; then
+                        READY=true
+                        break
+                    fi
+                    # Check if the process is still alive.
+                    if ! kill -0 "$ORCH_PID" 2>/dev/null; then
+                        echo "FAIL: Orchestrator exited prematurely"
+                        cat "$ORCH_LOG"
+                        exit 1
+                    fi
+                done
+
+                if [[ "$READY" != "true" ]]; then
+                    echo "FAIL: Orchestrator did not become ready in 30 seconds"
+                    cat "$ORCH_LOG"
+                    exit 1
+                fi
+
+                echo "Orchestrator is ready."
+
+                # Extract the listen address from the orchestrator log.
+                # The orchestrator logs "QUIC server listening on <addr>"
+                ORCH_ADDR=$(grep -o 'listening on [^ ]*' "$ORCH_LOG" | head -1 | awk '{print $NF}')
+                if [[ -z "$ORCH_ADDR" ]]; then
+                    # Fallback: try to parse from config (localhost:0 means random port).
+                    # If we can't find it, use the default.
+                    echo "WARNING: Could not extract orchestrator address from log, trying to find it..."
+                    ORCH_ADDR=$(grep -o 'localhost:[0-9]*' "$ORCH_LOG" | tail -1)
+                fi
+
+                if [[ -z "$ORCH_ADDR" ]]; then
+                    echo "FAIL: Could not determine orchestrator listen address"
+                    cat "$ORCH_LOG"
+                    exit 1
+                fi
+
+                echo "Orchestrator listening at: $ORCH_ADDR"
+
+                echo ""
+                echo "--- Step 2: Send MCP initialize ---"
+
+                INIT_REQ='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-test","version":"0.1.0"}}}'
+                INIT_RESP=$(echo "$INIT_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                echo "Response: $INIT_RESP"
+
+                if echo "$INIT_RESP" | grep -q '"protocolVersion"'; then
+                    echo "PASS: initialize returned protocolVersion"
+                else
+                    echo "FAIL: initialize did not return protocolVersion"
+                    exit 1
+                fi
+
+                echo ""
+                echo "--- Step 3: Send tools/list ---"
+
+                LIST_REQ='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+                LIST_RESP=$(echo "$LIST_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                echo "Response (truncated): $(echo "$LIST_RESP" | head -c 500)"
+
+                if echo "$LIST_RESP" | grep -q '"create_project"'; then
+                    echo "PASS: tools/list includes create_project"
+                else
+                    echo "FAIL: tools/list does not include create_project"
+                    exit 1
+                fi
+
+                if echo "$LIST_RESP" | grep -q '"create_feature"'; then
+                    echo "PASS: tools/list includes create_feature"
+                else
+                    echo "FAIL: tools/list does not include create_feature"
+                    exit 1
+                fi
+
+                echo ""
+                echo "--- Step 4: Create a project ---"
+
+                CREATE_PROJECT_REQ='{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"create_project","arguments":{"name":"test-project","description":"E2E test project"}}}'
+                CREATE_PROJECT_RESP=$(echo "$CREATE_PROJECT_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                echo "Response: $CREATE_PROJECT_RESP"
+
+                if echo "$CREATE_PROJECT_RESP" | grep -q 'test-project'; then
+                    echo "PASS: create_project returned project data"
+                else
+                    echo "FAIL: create_project did not return expected data"
+                    exit 1
+                fi
+
+                echo ""
+                echo "--- Step 5: Create a feature ---"
+
+                CREATE_FEATURE_REQ='{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"create_feature","arguments":{"project_id":"test-project","title":"Test Feature","description":"Created by E2E test","priority":"P1"}}}'
+                CREATE_FEATURE_RESP=$(echo "$CREATE_FEATURE_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                echo "Response: $CREATE_FEATURE_RESP"
+
+                if echo "$CREATE_FEATURE_RESP" | grep -q 'FEAT-'; then
+                    echo "PASS: create_feature returned feature with FEAT- ID"
+                else
+                    echo "FAIL: create_feature did not return expected data"
+                    exit 1
+                fi
+
+                echo ""
+                echo "--- Step 6: Verify feature file on disk ---"
+
+                # List the features directory.
+                FEATURES_DIR="$WORKSPACE/.projects/test-project/features"
+                if [[ -d "$FEATURES_DIR" ]]; then
+                    echo "Features directory exists: $FEATURES_DIR"
+                    ls -la "$FEATURES_DIR/"
+
+                    # Check at least one FEAT-*.md file exists.
+                    FEAT_FILES=$(find "$FEATURES_DIR" -name "FEAT-*.md" 2>/dev/null | wc -l | tr -d ' ')
+                    if [[ "$FEAT_FILES" -gt 0 ]]; then
+                        echo "PASS: Found $FEAT_FILES feature file(s) on disk"
+
+                        # Show the content of the first feature file.
+                        FIRST_FEAT=$(find "$FEATURES_DIR" -name "FEAT-*.md" | head -1)
+                        echo ""
+                        echo "Feature file content:"
+                        cat "$FIRST_FEAT"
+                        echo ""
+
+                        # Verify it contains META block.
+                        if grep -q "META" "$FIRST_FEAT"; then
+                            echo "PASS: Feature file contains META block"
+                        else
+                            echo "FAIL: Feature file missing META block"
+                            exit 1
+                        fi
+                    else
+                        echo "FAIL: No FEAT-*.md files found in $FEATURES_DIR"
+                        exit 1
+                    fi
+                else
+                    echo "FAIL: Features directory does not exist at $FEATURES_DIR"
+                    ls -laR "$WORKSPACE/.projects/" 2>/dev/null || echo "No .projects directory"
+                    exit 1
+                fi
+
+                echo ""
+                echo "--- Step 7: Get feature back ---"
+
+                # Extract feature ID from the create response.
+                FEATURE_ID=$(echo "$CREATE_FEATURE_RESP" | grep -o 'FEAT-[A-Z0-9]*' | head -1)
+                if [[ -z "$FEATURE_ID" ]]; then
+                    echo "WARNING: Could not extract feature ID, skipping get_feature test"
+                else
+                    GET_FEATURE_REQ="{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"get_feature\",\"arguments\":{\"project_id\":\"test-project\",\"feature_id\":\"$FEATURE_ID\"}}}"
+                    GET_FEATURE_RESP=$(echo "$GET_FEATURE_REQ" | "$BIN/transport-stdio" --orchestrator-addr="$ORCH_ADDR" --certs-dir="$CERTS_DIR")
+
+                    echo "Response: $GET_FEATURE_RESP"
+
+                    if echo "$GET_FEATURE_RESP" | grep -q 'Test Feature'; then
+                        echo "PASS: get_feature returned correct title"
+                    else
+                        echo "FAIL: get_feature did not return expected data"
+                        exit 1
+                    fi
+                fi
+
+                echo ""
+                echo "==============================="
+                echo "  ALL E2E TESTS PASSED"
+                echo "==============================="
+            replaceAll: false
+            structuredPatch:
+                - lines:
+                    - '         cat "$FIRST_FEAT"'
+                    - '         echo ""'
+                    - ' '
+                    - '-        # Verify it contains META block.'
+                    - '-        if grep -q "META" "$FIRST_FEAT"; then'
+                    - '-            echo "PASS: Feature file contains META block"'
+                    - '+        # Verify it contains YAML frontmatter (--- delimiters with metadata).'
+                    - +        if grep -q "^---" "$FIRST_FEAT"; then
+                    - '+            echo "PASS: Feature file contains YAML frontmatter"'
+                    - '         else'
+                    - '-            echo "FAIL: Feature file missing META block"'
+                    - '+            echo "FAIL: Feature file missing YAML frontmatter"'
+                    - '             exit 1'
+                    - '         fi'
+                    - '     else'
+                  newLines: 11
+                  newStart: 189
+                  oldLines: 11
+                  oldStart: 189
+            userModified: false
+        tool_use_id: toolu_01MsyvCR5LKfWzAQfNTLGAgo
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:28:01Z"
+    - event_type: PostToolUse
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      tool_name: Bash
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: PostToolUse
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        tool_input:
+            command: make build 2>&1 && make test-e2e 2>&1
+            description: Build and run E2E test
+            timeout: 120000
+        tool_name: Bash
+        tool_response:
+            interrupted: false
+            isImage: false
+            noOutputExpected: false
+            stderr: ""
+            stdout: |-
+                go build -o bin/orchestrator ./libs/orchestrator/cmd/
+                go build -o bin/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                go build -o bin/tools-features ./libs/plugin-tools-features/cmd/
+                go build -o bin/transport-stdio ./libs/plugin-transport-stdio/cmd/
+                go build -ldflags "-X github.com/orchestra-mcp/cli/internal.Version=c61276b-dirty -X github.com/orchestra-mcp/cli/internal.Commit=c61276b -X github.com/orchestra-mcp/cli/internal.Date=2026-02-27T07:28:09Z" -o bin/orchestra ./libs/cli/
+                go build -o bin/orchestrator ./libs/orchestrator/cmd/
+                go build -o bin/storage-markdown ./libs/plugin-storage-markdown/cmd/
+                go build -o bin/tools-features ./libs/plugin-tools-features/cmd/
+                go build -o bin/transport-stdio ./libs/plugin-transport-stdio/cmd/
+                go build -ldflags "-X github.com/orchestra-mcp/cli/internal.Version=c61276b-dirty -X github.com/orchestra-mcp/cli/internal.Commit=c61276b -X github.com/orchestra-mcp/cli/internal.Date=2026-02-27T07:28:10Z" -o bin/orchestra ./libs/cli/
+                === Orchestra E2E Test ===
+                Workspace: /var/folders/cl/9dzqt8896w10fc8kzvwkpqlc0000gn/T/tmp.jA8vqLfPZv
+                Certs dir: /var/folders/cl/9dzqt8896w10fc8kzvwkpqlc0000gn/T/tmp.jA8vqLfPZv/.certs
+
+                --- Step 1: Start orchestrator ---
+                Waiting for orchestrator (pid=84143)...
+                Orchestrator is ready.
+                Orchestrator listening at: 127.0.0.1:56435
+
+                --- Step 2: Send MCP initialize ---
+                transport.stdio: connected to orchestrator at 127.0.0.1:56435
+                Response: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"orchestra","version":"1.0.0"}}}
+                PASS: initialize returned protocolVersion
+
+                --- Step 3: Send tools/list ---
+                transport.stdio: connected to orchestrator at 127.0.0.1:56435
+                Response (truncated): {"jsonrpc":"2.0","id":2,"result":{"tools":[{"name":"check_wip_limit","description":"Check if the WIP limit would be exceeded","inputSchema":{"properties":{"project_id":{"description":"Project slug","type":"string"}},"required":["project_id"],"type":"object"}},{"name":"get_project_status","description":"Get project status with feature counts by status","inputSchema":{"properties":{"project_id":{"description":"Project slug","type":"string"}},"required":["project_id"],"type":"object"}},{"name":"get
+                PASS: tools/list includes create_project
+                PASS: tools/list includes create_feature
+
+                --- Step 4: Create a project ---
+                transport.stdio: connected to orchestrator at 127.0.0.1:56435
+                Response: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"Created project: test-project (slug: test-project)"}]}}
+                PASS: create_project returned project data
+
+                --- Step 5: Create a feature ---
+                transport.stdio: connected to orchestrator at 127.0.0.1:56435
+                Response: {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"Created **FEAT-PGT**: Test Feature\n\n### FEAT-PGT — Test Feature\n- **Status:** backlog\n- **Priority:** P1\n\nCreated by E2E test\n"}]}}
+                PASS: create_feature returned feature with FEAT- ID
+
+                --- Step 6: Verify feature file on disk ---
+                Features directory exists: /var/folders/cl/9dzqt8896w10fc8kzvwkpqlc0000gn/T/tmp.jA8vqLfPZv/.projects/test-project/features
+                total 16
+                drwxr-xr-x@ 4 fadymondy  staff  128 Feb 27 09:28 .
+                drwxr-xr-x@ 5 fadymondy  staff  160 Feb 27 09:28 ..
+                -rw-r--r--@ 1 fadymondy  staff  246 Feb 27 09:28 FEAT-PGT.md
+                -rw-r--r--@ 1 fadymondy  staff    1 Feb 27 09:28 FEAT-PGT.md.version
+                PASS: Found 1 feature file(s) on disk
+
+                Feature file content:
+                ---
+                created_at: "2026-02-27T07:28:13Z"
+                description: Created by E2E test
+                id: FEAT-PGT
+                priority: P1
+                project_id: test-project
+                status: backlog
+                title: Test Feature
+                updated_at: "2026-02-27T07:28:13Z"
+                version: 0
+                ---
+
+                # Test Feature
+
+                Created by E2E test
+
+                PASS: Feature file contains YAML frontmatter
+
+                --- Step 7: Get feature back ---
+                transport.stdio: connected to orchestrator at 127.0.0.1:56435
+                Response: {"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"### FEAT-PGT — Test Feature\n- **Status:** backlog\n- **Priority:** P1\n\nCreated by E2E test\n\n---\n\n# Test Feature\n\nCreated by E2E test\n"}]}}
+                PASS: get_feature returned correct title
+
+                ===============================
+                  ALL E2E TESTS PASSED
+                ===============================
+                --- Cleaning up ---
+                --- Done ---
+        tool_use_id: toolu_01BM7KxLRJNSVhXnaUYGGdmP
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:28:43Z"
+    - event_type: Stop
+      session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+      data:
+        cwd: /Users/fadymondy/Sites/orchestra-agents
+        hook_event_name: Stop
+        last_assistant_message: |-
+            All passing — build, unit tests, and E2E.
+
+            The fix: the E2E test was checking for `META` (old format) but the storage plugin writes YAML frontmatter (`---`). Changed the check from `grep -q "META"` to `grep -q "^---"`.
+        permission_mode: acceptEdits
+        session_id: 42e039ef-ffda-42b3-aff0-9f3b4aec2a0e
+        stop_hook_active: false
+        transcript_path: /Users/fadymondy/.claude/projects/-Users-fadymondy-Sites-orchestra-agents/42e039ef-ffda-42b3-aff0-9f3b4aec2a0e.jsonl
+      timestamp: "2026-02-27T07:28:47Z"
