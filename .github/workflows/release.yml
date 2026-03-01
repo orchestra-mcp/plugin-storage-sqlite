@@ -8,7 +8,6 @@ permissions:
   contents: write
 
 env:
-  GOWORK: "off"
   GONOSUMCHECK: github.com/orchestra-mcp/*
   GONOSUMDB: github.com/orchestra-mcp/*
 
@@ -37,7 +36,7 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install dependencies
+      - name: Clone dependencies
         shell: bash
         run: |
           python3 << 'PYEOF'
@@ -62,6 +61,16 @@ jobs:
                       sys.exit(1)
               print(f"  Cloned {path}")
           PYEOF
+
+      - name: Generate go.work
+        shell: bash
+        run: |
+          echo 'go 1.23' > go.work
+          echo '' >> go.work
+          echo 'use (' >> go.work
+          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
+          echo ')' >> go.work
+          cat go.work
 
       - name: Build all binaries
         env:
@@ -141,7 +150,7 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install dependencies
+      - name: Clone dependencies
         shell: bash
         run: |
           python3 << 'PYEOF'
@@ -166,6 +175,16 @@ jobs:
                       sys.exit(1)
               print(f"  Cloned {path}")
           PYEOF
+
+      - name: Generate go.work
+        shell: bash
+        run: |
+          echo 'go 1.23' > go.work
+          echo '' >> go.work
+          echo 'use (' >> go.work
+          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
+          echo ')' >> go.work
+          cat go.work
 
       - name: Run unit tests
         shell: bash
