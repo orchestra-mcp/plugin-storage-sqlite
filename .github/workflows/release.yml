@@ -7,6 +7,11 @@ on:
 permissions:
   contents: write
 
+env:
+  GOWORK: "off"
+  GONOSUMCHECK: github.com/orchestra-mcp/*
+  GONOSUMDB: github.com/orchestra-mcp/*
+
 jobs:
   build:
     strategy:
@@ -39,6 +44,8 @@ jobs:
           import json, subprocess, sys
           lock = json.load(open("orchestra.lock"))
           for pkg in lock["packages"]:
+              if pkg["type"] in ("proto",):
+                  continue
               url = pkg["source"]["url"]
               path = pkg["path"]
               version = pkg["version"]
@@ -60,6 +67,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+        shell: bash
         run: |
           VERSION="${GITHUB_REF_NAME}"
           COMMIT="$(git rev-parse --short HEAD)"
@@ -69,18 +77,37 @@ jobs:
                    -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
 
           mkdir -p dist
-          go build -ldflags "${LDFLAGS}" -o dist/orchestra ./libs/cli/
-          go build -o dist/orchestrator ./libs/orchestrator/cmd/
-          go build -o dist/storage-markdown ./libs/plugin-storage-markdown/cmd/
-          go build -o dist/tools-features ./libs/plugin-tools-features/cmd/
-          go build -o dist/transport-stdio ./libs/plugin-transport-stdio/cmd/
-          go build -o dist/tools-marketplace ./libs/plugin-tools-marketplace/cmd/
+
+          python3 << PYEOF
+          import json, subprocess, sys
+          lock = json.load(open("orchestra.lock"))
+          for pkg in lock["packages"]:
+              binary = pkg.get("binary")
+              path = pkg.get("path", "")
+              pkg_type = pkg.get("type", "")
+              # Skip proto (no binary), engine-rag (Rust), libs without binaries
+              if not binary or pkg_type == "proto" or "engine-rag" in path:
+                  continue
+              # CLI gets ldflags for version injection
+              if pkg_type == "cli":
+                  cmd = ["go", "build", "-ldflags", "${LDFLAGS}", "-o", f"dist/{binary}", f"./{path}/"]
+              else:
+                  cmd = ["go", "build", "-o", f"dist/{binary}", f"./{path}/cmd/"]
+              print(f"  Building {binary} from {path}...")
+              result = subprocess.run(cmd, capture_output=True, text=True)
+              if result.returncode != 0:
+                  print(f"  FAILED: {binary}", file=sys.stderr)
+                  print(result.stderr, file=sys.stderr)
+                  sys.exit(1)
+              print(f"  OK: {binary}")
+          PYEOF
 
       - name: Package tarball
+        shell: bash
         run: |
           cd dist
-          tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
-            orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace
+          BINARIES=$(python3 -c 'import json;[print(p["binary"]) for p in json.load(open("../orchestra.lock"))["packages"] if p.get("binary") and p["type"] != "proto" and "engine-rag" not in p.get("path","")]')
+          tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz ${BINARIES}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -105,6 +132,10 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      GOWORK: "off"
+      GONOSUMCHECK: github.com/orchestra-mcp/*
+      GONOSUMDB: github.com/orchestra-mcp/*
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -118,6 +149,8 @@ jobs:
           import json, subprocess, sys
           lock = json.load(open("orchestra.lock"))
           for pkg in lock["packages"]:
+              if pkg["type"] in ("proto",):
+                  continue
               url = pkg["source"]["url"]
               path = pkg["path"]
               version = pkg["version"]
@@ -138,7 +171,7 @@ jobs:
       - name: Run unit tests
         shell: bash
         run: |
-          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto","cli")]' | while read path; do
+          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto","cli") and "engine-rag" not in p.get("path","")]' | while read path; do
             echo "go test ./${path}/... -v"
             go test "./${path}/..." -v
           done

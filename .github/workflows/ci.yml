@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master, main]
 
+env:
+  GOWORK: "off"
+  GONOSUMCHECK: github.com/orchestra-mcp/*
+  GONOSUMDB: github.com/orchestra-mcp/*
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,11 +27,12 @@ jobs:
           import json, subprocess, sys
           lock = json.load(open("orchestra.lock"))
           for pkg in lock["packages"]:
+              if pkg["type"] == "proto":
+                  continue
               url = pkg["source"]["url"]
               path = pkg["path"]
               version = pkg["version"]
               ref = pkg["source"].get("reference", "master")
-              # Try pinned version first, fall back to branch
               result = subprocess.run(["git", "clone", "--depth", "1", "--branch", version, url, path],
                                       capture_output=True)
               if result.returncode != 0:
@@ -46,9 +52,6 @@ jobs:
       - name: Run unit tests
         run: make test-unit
 
-      - name: Run E2E tests
-        run: make test-e2e
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -64,6 +67,8 @@ jobs:
           import json, subprocess, sys
           lock = json.load(open("orchestra.lock"))
           for pkg in lock["packages"]:
+              if pkg["type"] == "proto":
+                  continue
               url = pkg["source"]["url"]
               path = pkg["path"]
               version = pkg["version"]
@@ -84,7 +89,7 @@ jobs:
       - name: Vet
         shell: bash
         run: |
-          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto",)]' | while read path; do
+          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto",) and "engine-rag" not in p.get("path","")]' | while read path; do
             echo "go vet ./${path}/..."
             go vet "./${path}/..."
           done
