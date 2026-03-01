@@ -48,11 +48,16 @@ jobs:
       - name: Generate go.work
         shell: bash
         run: |
-          echo 'go 1.23' > go.work
-          echo '' >> go.work
-          echo 'use (' >> go.work
-          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
-          echo ')' >> go.work
+          python3 << 'PYEOF'
+          import json
+          lock = json.load(open("orchestra.lock"))
+          paths = [p["path"] for p in lock["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]
+          with open("go.work", "w") as f:
+              f.write("go 1.23\n\nuse (\n")
+              for p in paths:
+                  f.write(f"\t./{p}\n")
+              f.write(")\n")
+          PYEOF
           cat go.work
 
       - name: Build all binaries
@@ -98,11 +103,16 @@ jobs:
       - name: Generate go.work
         shell: bash
         run: |
-          echo 'go 1.23' > go.work
-          echo '' >> go.work
-          echo 'use (' >> go.work
-          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
-          echo ')' >> go.work
+          python3 << 'PYEOF'
+          import json
+          lock = json.load(open("orchestra.lock"))
+          paths = [p["path"] for p in lock["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]
+          with open("go.work", "w") as f:
+              f.write("go 1.23\n\nuse (\n")
+              for p in paths:
+                  f.write(f"\t./{p}\n")
+              f.write(")\n")
+          PYEOF
           cat go.work
 
       - name: Vet

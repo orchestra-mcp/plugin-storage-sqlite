@@ -65,11 +65,16 @@ jobs:
       - name: Generate go.work
         shell: bash
         run: |
-          echo 'go 1.23' > go.work
-          echo '' >> go.work
-          echo 'use (' >> go.work
-          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
-          echo ')' >> go.work
+          python3 << 'PYEOF'
+          import json
+          lock = json.load(open("orchestra.lock"))
+          paths = [p["path"] for p in lock["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]
+          with open("go.work", "w") as f:
+              f.write("go 1.23\n\nuse (\n")
+              for p in paths:
+                  f.write(f"\t./{p}\n")
+              f.write(")\n")
+          PYEOF
           cat go.work
 
       - name: Build all binaries
@@ -97,10 +102,8 @@ jobs:
               binary = pkg.get("binary")
               path = pkg.get("path", "")
               pkg_type = pkg.get("type", "")
-              # Skip proto (no binary), engine-rag (Rust), libs without binaries
               if not binary or pkg_type == "proto" or "engine-rag" in path:
                   continue
-              # CLI gets ldflags for version injection; cli builds from root of its module
               if pkg_type == "cli":
                   cmd = ["go", "build", "-ldflags", ldflags, "-o", f"{dist}/{binary}", "."]
               else:
@@ -118,7 +121,13 @@ jobs:
         shell: bash
         run: |
           cd dist
-          BINARIES=$(python3 -c 'import json;[print(p["binary"]) for p in json.load(open("../orchestra.lock"))["packages"] if p.get("binary") and p["type"] != "proto" and "engine-rag" not in p.get("path","")]')
+          BINARIES=$(python3 -c "
+          import json
+          lock = json.load(open('../orchestra.lock'))
+          bins = [p['binary'] for p in lock['packages'] if p.get('binary') and p['type'] != 'proto' and 'engine-rag' not in p.get('path','')]
+          print(' '.join(bins))
+          ")
+          echo "Packaging: ${BINARIES}"
           tar -czf orchestra-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz ${BINARIES}
 
       - name: Upload artifact
@@ -179,17 +188,33 @@ jobs:
       - name: Generate go.work
         shell: bash
         run: |
-          echo 'go 1.23' > go.work
-          echo '' >> go.work
-          echo 'use (' >> go.work
-          python3 -c 'import json;[print(f"\t./{p[\"path\"]}") for p in json.load(open("orchestra.lock"))["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]' >> go.work
-          echo ')' >> go.work
+          python3 << 'PYEOF'
+          import json
+          lock = json.load(open("orchestra.lock"))
+          paths = [p["path"] for p in lock["packages"] if p["type"] != "proto" and "engine-rag" not in p.get("path","")]
+          with open("go.work", "w") as f:
+              f.write("go 1.23\n\nuse (\n")
+              for p in paths:
+                  f.write(f"\t./{p}\n")
+              f.write(")\n")
+          PYEOF
           cat go.work
 
       - name: Run unit tests
         shell: bash
         run: |
-          python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto","cli") and "engine-rag" not in p.get("path","")]' | while read path; do
-            echo "go test ${path}/..."
-            (cd "${path}" && go test ./... -v)
-          done
+          python3 << 'PYEOF'
+          import json, subprocess, sys
+          lock = json.load(open("orchestra.lock"))
+          for pkg in lock["packages"]:
+              path = pkg["path"]
+              pkg_type = pkg["type"]
+              if pkg_type in ("proto", "cli") or "engine-rag" in path:
+                  continue
+              print(f"  Testing {path}...")
+              result = subprocess.run(["go", "test", "./...", "-v"], capture_output=True, text=True, cwd=path)
+              print(result.stdout)
+              if result.returncode != 0:
+                  print(result.stderr, file=sys.stderr)
+                  sys.exit(1)
+          PYEOF
