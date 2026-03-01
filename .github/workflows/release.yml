@@ -90,10 +90,11 @@ jobs:
                    -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
                    -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
 
-          DIST="$(pwd)/dist"
+          export DIST="$(pwd)/dist"
+          export LDFLAGS
           mkdir -p "${DIST}"
 
-          python3 << PYEOF
+          python3 << 'PYEOF'
           import json, subprocess, sys, os
           lock = json.load(open("orchestra.lock"))
           dist = os.environ["DIST"]
