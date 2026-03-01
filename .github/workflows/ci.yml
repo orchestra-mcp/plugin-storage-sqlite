@@ -90,6 +90,6 @@ jobs:
         shell: bash
         run: |
           python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto",) and "engine-rag" not in p.get("path","")]' | while read path; do
-            echo "go vet ./${path}/..."
-            go vet "./${path}/..."
+            echo "go vet ${path}/..."
+            (cd "${path}" && go vet ./...)
           done

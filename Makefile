@@ -1,52 +1,10 @@
 .PHONY: proto build build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli build-web build-next dev-next storybook-next test test-unit test-e2e test-engine-rag clean install release build-tools-marketplace build-engine-rag build-bridge-claude build-tools-agentops build-tools-sessions build-tools-workspace build-transport-quic-bridge build-bridge-openai build-bridge-gemini build-bridge-ollama build-bridge-firecrawl build-tools-markdown build-tools-docs build-tools-notes build-devtools-git build-agent-orchestrator build-ai-screenshot build-ai-vision build-ai-browser-context build-ai-screen-reader build-services-voice build-services-notifications build-tools-extension-generator build-devtools-file-explorer build-devtools-terminal build-devtools-ssh build-devtools-services build-devtools-docker build-devtools-debugger build-devtools-test-runner build-devtools-log-viewer build-devtools-database build-devtools-devops build-integration-figma build-devtools-components xcodegen-swift build-swift build-swift-ios run-swift test-swift dev-swift clean-swift
 
 # Directories
-BIN_DIR := bin
+ROOT_DIR := $(shell pwd)
+BIN_DIR := $(ROOT_DIR)/bin
 PROTO_DIR := libs/proto
 GEN_DIR := libs/gen-go
-
-# Binaries
-ORCHESTRATOR := $(BIN_DIR)/orchestrator
-STORAGE_MARKDOWN := $(BIN_DIR)/storage-markdown
-TOOLS_FEATURES := $(BIN_DIR)/tools-features
-TRANSPORT_STDIO := $(BIN_DIR)/transport-stdio
-ORCHESTRA_CLI := $(BIN_DIR)/orchestra
-DEVTOOLS_COMPONENTS := $(BIN_DIR)/devtools-components
-INTEGRATION_FIGMA := $(BIN_DIR)/integration-figma
-DEVTOOLS_DEVOPS := $(BIN_DIR)/devtools-devops
-DEVTOOLS_DATABASE := $(BIN_DIR)/devtools-database
-DEVTOOLS_LOG_VIEWER := $(BIN_DIR)/devtools-log-viewer
-DEVTOOLS_TEST_RUNNER := $(BIN_DIR)/devtools-test-runner
-DEVTOOLS_DEBUGGER := $(BIN_DIR)/devtools-debugger
-DEVTOOLS_DOCKER := $(BIN_DIR)/devtools-docker
-DEVTOOLS_SERVICES := $(BIN_DIR)/devtools-services
-DEVTOOLS_SSH := $(BIN_DIR)/devtools-ssh
-DEVTOOLS_TERMINAL := $(BIN_DIR)/devtools-terminal
-DEVTOOLS_FILE_EXPLORER := $(BIN_DIR)/devtools-file-explorer
-TOOLS_EXTENSION_GENERATOR := $(BIN_DIR)/tools-extension-generator
-SERVICES_NOTIFICATIONS := $(BIN_DIR)/services-notifications
-SERVICES_VOICE := $(BIN_DIR)/services-voice
-AI_SCREEN_READER := $(BIN_DIR)/ai-screen-reader
-AI_BROWSER_CONTEXT := $(BIN_DIR)/ai-browser-context
-AI_VISION := $(BIN_DIR)/ai-vision
-AI_SCREENSHOT := $(BIN_DIR)/ai-screenshot
-AGENT_ORCHESTRATOR := $(BIN_DIR)/agent-orchestrator
-DEVTOOLS_GIT := $(BIN_DIR)/devtools-git
-TOOLS_NOTES := $(BIN_DIR)/tools-notes
-TOOLS_DOCS := $(BIN_DIR)/tools-docs
-TOOLS_MARKDOWN := $(BIN_DIR)/tools-markdown
-BRIDGE_FIRECRAWL := $(BIN_DIR)/bridge-firecrawl
-BRIDGE_OLLAMA := $(BIN_DIR)/bridge-ollama
-BRIDGE_GEMINI := $(BIN_DIR)/bridge-gemini
-BRIDGE_OPENAI := $(BIN_DIR)/bridge-openai
-TRANSPORT_QUIC_BRIDGE := $(BIN_DIR)/transport-quic-bridge
-TOOLS_SESSIONS := $(BIN_DIR)/tools-sessions
-TOOLS_AGENTOPS := $(BIN_DIR)/tools-agentops
-TOOLS_WORKSPACE := $(BIN_DIR)/tools-workspace
-BRIDGE_CLAUDE := $(BIN_DIR)/bridge-claude
-ENGINE_RAG := $(BIN_DIR)/engine-rag
-TOOLS_MARKETPLACE := $(BIN_DIR)/tools-marketplace
-WEB := $(BIN_DIR)/web
 
 # === Proto ===
 
@@ -61,27 +19,27 @@ build-all: build build-web build-engine-rag
 
 build-orchestrator:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(ORCHESTRATOR) ./libs/orchestrator/cmd/
+	cd libs/orchestrator && go build -o $(BIN_DIR)/orchestrator ./cmd/
 
 build-storage-markdown:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(STORAGE_MARKDOWN) ./libs/plugin-storage-markdown/cmd/
+	cd libs/plugin-storage-markdown && go build -o $(BIN_DIR)/storage-markdown ./cmd/
 
 build-tools-features:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_FEATURES) ./libs/plugin-tools-features/cmd/
+	cd libs/plugin-tools-features && go build -o $(BIN_DIR)/tools-features ./cmd/
 
 build-transport-stdio:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TRANSPORT_STDIO) ./libs/plugin-transport-stdio/cmd/
+	cd libs/plugin-transport-stdio && go build -o $(BIN_DIR)/transport-stdio ./cmd/
 
 build-cli:
 	@mkdir -p $(BIN_DIR)
-	go build -ldflags "-X github.com/orchestra-mcp/cli/internal.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) -X github.com/orchestra-mcp/cli/internal.Commit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) -X github.com/orchestra-mcp/cli/internal.Date=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)" -o $(ORCHESTRA_CLI) ./libs/cli/
+	cd libs/cli && go build -ldflags "-X github.com/orchestra-mcp/cli/internal.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) -X github.com/orchestra-mcp/cli/internal.Commit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) -X github.com/orchestra-mcp/cli/internal.Date=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)" -o $(BIN_DIR)/orchestra .
 
 build-web:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(WEB) ./apps/web/cmd/
+	cd apps/web && go build -o $(BIN_DIR)/web ./cmd/
 
 NEXT_DIR := apps/next
 
@@ -99,45 +57,45 @@ storybook-next:
 test: test-unit
 
 test-unit:
-	go test ./libs/sdk-go/... -v
-	go test ./libs/orchestrator/... -v
-	go test ./libs/plugin-storage-markdown/... -v
-	go test ./libs/plugin-tools-features/... -v
-	go test ./libs/plugin-transport-stdio/... -v
-	go test ./libs/plugin-devtools-components/... -v
-	go test ./libs/plugin-integration-figma/... -v
-	go test ./libs/plugin-devtools-devops/... -v
-	go test ./libs/plugin-devtools-database/... -v
-	go test ./libs/plugin-devtools-log-viewer/... -v
-	go test ./libs/plugin-devtools-test-runner/... -v
-	go test ./libs/plugin-devtools-debugger/... -v
-	go test ./libs/plugin-devtools-docker/... -v
-	go test ./libs/plugin-devtools-services/... -v
-	go test ./libs/plugin-devtools-ssh/... -v
-	go test ./libs/plugin-devtools-terminal/... -v
-	go test ./libs/plugin-devtools-file-explorer/... -v
-	go test ./libs/plugin-tools-extension-generator/... -v
-	go test ./libs/plugin-services-notifications/... -v
-	go test ./libs/plugin-services-voice/... -v
-	go test ./libs/plugin-ai-screen-reader/... -v
-	go test ./libs/plugin-ai-browser-context/... -v
-	go test ./libs/plugin-ai-vision/... -v
-	go test ./libs/plugin-ai-screenshot/... -v
-	go test ./libs/plugin-agent-orchestrator/... -v
-	go test ./libs/plugin-devtools-git/... -v
-	go test ./libs/plugin-tools-notes/... -v
-	go test ./libs/plugin-tools-docs/... -v
-	go test ./libs/plugin-tools-markdown/... -v
-	go test ./libs/plugin-bridge-firecrawl/... -v
-	go test ./libs/plugin-bridge-ollama/... -v
-	go test ./libs/plugin-bridge-gemini/... -v
-	go test ./libs/plugin-bridge-openai/... -v
-	go test ./libs/plugin-transport-quic-bridge/... -v
-	go test ./libs/plugin-tools-sessions/... -v
-	go test ./libs/plugin-tools-agentops/... -v
-	go test ./libs/plugin-tools-workspace/... -v
-	go test ./libs/plugin-bridge-claude/... -v
-	go test ./libs/plugin-tools-marketplace/... -v
+	cd libs/sdk-go && go test ./... -v
+	cd libs/orchestrator && go test ./... -v
+	cd libs/plugin-storage-markdown && go test ./... -v
+	cd libs/plugin-tools-features && go test ./... -v
+	cd libs/plugin-transport-stdio && go test ./... -v
+	cd libs/plugin-devtools-components && go test ./... -v
+	cd libs/plugin-integration-figma && go test ./... -v
+	cd libs/plugin-devtools-devops && go test ./... -v
+	cd libs/plugin-devtools-database && go test ./... -v
+	cd libs/plugin-devtools-log-viewer && go test ./... -v
+	cd libs/plugin-devtools-test-runner && go test ./... -v
+	cd libs/plugin-devtools-debugger && go test ./... -v
+	cd libs/plugin-devtools-docker && go test ./... -v
+	cd libs/plugin-devtools-services && go test ./... -v
+	cd libs/plugin-devtools-ssh && go test ./... -v
+	cd libs/plugin-devtools-terminal && go test ./... -v
+	cd libs/plugin-devtools-file-explorer && go test ./... -v
+	cd libs/plugin-tools-extension-generator && go test ./... -v
+	cd libs/plugin-services-notifications && go test ./... -v
+	cd libs/plugin-services-voice && go test ./... -v
+	cd libs/plugin-ai-screen-reader && go test ./... -v
+	cd libs/plugin-ai-browser-context && go test ./... -v
+	cd libs/plugin-ai-vision && go test ./... -v
+	cd libs/plugin-ai-screenshot && go test ./... -v
+	cd libs/plugin-agent-orchestrator && go test ./... -v
+	cd libs/plugin-devtools-git && go test ./... -v
+	cd libs/plugin-tools-notes && go test ./... -v
+	cd libs/plugin-tools-docs && go test ./... -v
+	cd libs/plugin-tools-markdown && go test ./... -v
+	cd libs/plugin-bridge-firecrawl && go test ./... -v
+	cd libs/plugin-bridge-ollama && go test ./... -v
+	cd libs/plugin-bridge-gemini && go test ./... -v
+	cd libs/plugin-bridge-openai && go test ./... -v
+	cd libs/plugin-transport-quic-bridge && go test ./... -v
+	cd libs/plugin-tools-sessions && go test ./... -v
+	cd libs/plugin-tools-agentops && go test ./... -v
+	cd libs/plugin-tools-workspace && go test ./... -v
+	cd libs/plugin-bridge-claude && go test ./... -v
+	cd libs/plugin-tools-marketplace && go test ./... -v
 
 test-e2e: build
 	@bash scripts/test-e2e.sh
@@ -172,12 +130,12 @@ release:
 	@for goos in darwin linux; do \
 		for goarch in amd64 arm64; do \
 			echo "Building $$goos/$$goarch..."; \
-			GOOS=$$goos GOARCH=$$goarch go build -ldflags "$(LDFLAGS)" -o $(DIST_DIR)/orchestra ./libs/cli/; \
-			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/orchestrator ./libs/orchestrator/cmd/; \
-			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/storage-markdown ./libs/plugin-storage-markdown/cmd/; \
-			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/tools-features ./libs/plugin-tools-features/cmd/; \
-			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/transport-stdio ./libs/plugin-transport-stdio/cmd/; \
-			GOOS=$$goos GOARCH=$$goarch go build -o $(DIST_DIR)/tools-marketplace ./libs/plugin-tools-marketplace/cmd/; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/cli && go build -ldflags "$(LDFLAGS)" -o $(ROOT_DIR)/$(DIST_DIR)/orchestra .'; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/orchestrator && go build -o $(ROOT_DIR)/$(DIST_DIR)/orchestrator ./cmd/'; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/plugin-storage-markdown && go build -o $(ROOT_DIR)/$(DIST_DIR)/storage-markdown ./cmd/'; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/plugin-tools-features && go build -o $(ROOT_DIR)/$(DIST_DIR)/tools-features ./cmd/'; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/plugin-transport-stdio && go build -o $(ROOT_DIR)/$(DIST_DIR)/transport-stdio ./cmd/'; \
+			GOOS=$$goos GOARCH=$$goarch sh -c 'cd libs/plugin-tools-marketplace && go build -o $(ROOT_DIR)/$(DIST_DIR)/tools-marketplace ./cmd/'; \
 			tar -czf $(DIST_DIR)/orchestra-$$goos-$$goarch.tar.gz -C $(DIST_DIR) orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace; \
 			rm -f $(DIST_DIR)/orchestra $(DIST_DIR)/orchestrator $(DIST_DIR)/storage-markdown $(DIST_DIR)/tools-features $(DIST_DIR)/transport-stdio $(DIST_DIR)/tools-marketplace; \
 		done; \
@@ -193,147 +151,147 @@ clean:
 
 build-tools-marketplace:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_MARKETPLACE) ./libs/plugin-tools-marketplace/cmd/
+	cd libs/plugin-tools-marketplace && go build -o $(BIN_DIR)/tools-marketplace ./cmd/
 
 build-engine-rag:
 	@mkdir -p $(BIN_DIR)
 	cd libs/plugin-engine-rag && cargo build --release
-	cp libs/plugin-engine-rag/target/release/orchestra-rag $(ENGINE_RAG)
+	cp libs/plugin-engine-rag/target/release/orchestra-rag $(BIN_DIR)/engine-rag
 
 test-engine-rag:
 	cd libs/plugin-engine-rag && cargo test
 
 build-bridge-claude:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BRIDGE_CLAUDE) ./libs/plugin-bridge-claude/cmd/
+	cd libs/plugin-bridge-claude && go build -o $(BIN_DIR)/bridge-claude ./cmd/
 
 build-tools-agentops:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_AGENTOPS) ./libs/plugin-tools-agentops/cmd/
+	cd libs/plugin-tools-agentops && go build -o $(BIN_DIR)/tools-agentops ./cmd/
 
 build-tools-sessions:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_SESSIONS) ./libs/plugin-tools-sessions/cmd/
+	cd libs/plugin-tools-sessions && go build -o $(BIN_DIR)/tools-sessions ./cmd/
 
 build-tools-workspace:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_WORKSPACE) ./libs/plugin-tools-workspace/cmd/
+	cd libs/plugin-tools-workspace && go build -o $(BIN_DIR)/tools-workspace ./cmd/
 
 build-transport-quic-bridge:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TRANSPORT_QUIC_BRIDGE) ./libs/plugin-transport-quic-bridge/cmd/
+	cd libs/plugin-transport-quic-bridge && go build -o $(BIN_DIR)/transport-quic-bridge ./cmd/
 
 build-bridge-openai:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BRIDGE_OPENAI) ./libs/plugin-bridge-openai/cmd/
+	cd libs/plugin-bridge-openai && go build -o $(BIN_DIR)/bridge-openai ./cmd/
 
 build-bridge-gemini:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BRIDGE_GEMINI) ./libs/plugin-bridge-gemini/cmd/
+	cd libs/plugin-bridge-gemini && go build -o $(BIN_DIR)/bridge-gemini ./cmd/
 
 build-bridge-ollama:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BRIDGE_OLLAMA) ./libs/plugin-bridge-ollama/cmd/
+	cd libs/plugin-bridge-ollama && go build -o $(BIN_DIR)/bridge-ollama ./cmd/
 
 build-bridge-firecrawl:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BRIDGE_FIRECRAWL) ./libs/plugin-bridge-firecrawl/cmd/
+	cd libs/plugin-bridge-firecrawl && go build -o $(BIN_DIR)/bridge-firecrawl ./cmd/
 
 build-tools-markdown:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_MARKDOWN) ./libs/plugin-tools-markdown/cmd/
+	cd libs/plugin-tools-markdown && go build -o $(BIN_DIR)/tools-markdown ./cmd/
 
 build-tools-docs:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_DOCS) ./libs/plugin-tools-docs/cmd/
+	cd libs/plugin-tools-docs && go build -o $(BIN_DIR)/tools-docs ./cmd/
 
 build-tools-notes:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_NOTES) ./libs/plugin-tools-notes/cmd/
+	cd libs/plugin-tools-notes && go build -o $(BIN_DIR)/tools-notes ./cmd/
 
 build-devtools-git:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_GIT) ./libs/plugin-devtools-git/cmd/
+	cd libs/plugin-devtools-git && go build -o $(BIN_DIR)/devtools-git ./cmd/
 
 build-agent-orchestrator:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(AGENT_ORCHESTRATOR) ./libs/plugin-agent-orchestrator/cmd/
+	cd libs/plugin-agent-orchestrator && go build -o $(BIN_DIR)/agent-orchestrator ./cmd/
 
 build-ai-screenshot:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(AI_SCREENSHOT) ./libs/plugin-ai-screenshot/cmd/
+	cd libs/plugin-ai-screenshot && go build -o $(BIN_DIR)/ai-screenshot ./cmd/
 
 build-ai-vision:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(AI_VISION) ./libs/plugin-ai-vision/cmd/
+	cd libs/plugin-ai-vision && go build -o $(BIN_DIR)/ai-vision ./cmd/
 
 build-ai-browser-context:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(AI_BROWSER_CONTEXT) ./libs/plugin-ai-browser-context/cmd/
+	cd libs/plugin-ai-browser-context && go build -o $(BIN_DIR)/ai-browser-context ./cmd/
 
 build-ai-screen-reader:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(AI_SCREEN_READER) ./libs/plugin-ai-screen-reader/cmd/
+	cd libs/plugin-ai-screen-reader && go build -o $(BIN_DIR)/ai-screen-reader ./cmd/
 
 build-services-voice:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(SERVICES_VOICE) ./libs/plugin-services-voice/cmd/
+	cd libs/plugin-services-voice && go build -o $(BIN_DIR)/services-voice ./cmd/
 
 build-services-notifications:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(SERVICES_NOTIFICATIONS) ./libs/plugin-services-notifications/cmd/
+	cd libs/plugin-services-notifications && go build -o $(BIN_DIR)/services-notifications ./cmd/
 
 build-tools-extension-generator:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(TOOLS_EXTENSION_GENERATOR) ./libs/plugin-tools-extension-generator/cmd/
+	cd libs/plugin-tools-extension-generator && go build -o $(BIN_DIR)/tools-extension-generator ./cmd/
 
 build-devtools-file-explorer:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_FILE_EXPLORER) ./libs/plugin-devtools-file-explorer/cmd/
+	cd libs/plugin-devtools-file-explorer && go build -o $(BIN_DIR)/devtools-file-explorer ./cmd/
 
 build-devtools-terminal:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_TERMINAL) ./libs/plugin-devtools-terminal/cmd/
+	cd libs/plugin-devtools-terminal && go build -o $(BIN_DIR)/devtools-terminal ./cmd/
 
 build-devtools-ssh:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_SSH) ./libs/plugin-devtools-ssh/cmd/
+	cd libs/plugin-devtools-ssh && go build -o $(BIN_DIR)/devtools-ssh ./cmd/
 
 build-devtools-services:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_SERVICES) ./libs/plugin-devtools-services/cmd/
+	cd libs/plugin-devtools-services && go build -o $(BIN_DIR)/devtools-services ./cmd/
 
 build-devtools-docker:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_DOCKER) ./libs/plugin-devtools-docker/cmd/
+	cd libs/plugin-devtools-docker && go build -o $(BIN_DIR)/devtools-docker ./cmd/
 
 build-devtools-debugger:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_DEBUGGER) ./libs/plugin-devtools-debugger/cmd/
+	cd libs/plugin-devtools-debugger && go build -o $(BIN_DIR)/devtools-debugger ./cmd/
 
 build-devtools-test-runner:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_TEST_RUNNER) ./libs/plugin-devtools-test-runner/cmd/
+	cd libs/plugin-devtools-test-runner && go build -o $(BIN_DIR)/devtools-test-runner ./cmd/
 
 build-devtools-log-viewer:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_LOG_VIEWER) ./libs/plugin-devtools-log-viewer/cmd/
+	cd libs/plugin-devtools-log-viewer && go build -o $(BIN_DIR)/devtools-log-viewer ./cmd/
 
 build-devtools-database:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_DATABASE) ./libs/plugin-devtools-database/cmd/
+	cd libs/plugin-devtools-database && go build -o $(BIN_DIR)/devtools-database ./cmd/
 
 build-devtools-devops:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_DEVOPS) ./libs/plugin-devtools-devops/cmd/
+	cd libs/plugin-devtools-devops && go build -o $(BIN_DIR)/devtools-devops ./cmd/
 
 build-integration-figma:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(INTEGRATION_FIGMA) ./libs/plugin-integration-figma/cmd/
+	cd libs/plugin-integration-figma && go build -o $(BIN_DIR)/integration-figma ./cmd/
 
 build-devtools-components:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(DEVTOOLS_COMPONENTS) ./libs/plugin-devtools-components/cmd/
+	cd libs/plugin-devtools-components && go build -o $(BIN_DIR)/devtools-components ./cmd/
 
 # === Swift Universal App ===
 

@@ -76,11 +76,14 @@ jobs:
                    -X github.com/orchestra-mcp/cli/internal.Commit=${COMMIT} \
                    -X github.com/orchestra-mcp/cli/internal.Date=${DATE}"
 
-          mkdir -p dist
+          DIST="$(pwd)/dist"
+          mkdir -p "${DIST}"
 
           python3 << PYEOF
-          import json, subprocess, sys
+          import json, subprocess, sys, os
           lock = json.load(open("orchestra.lock"))
+          dist = os.environ["DIST"]
+          ldflags = os.environ["LDFLAGS"]
           for pkg in lock["packages"]:
               binary = pkg.get("binary")
               path = pkg.get("path", "")
@@ -88,13 +91,13 @@ jobs:
               # Skip proto (no binary), engine-rag (Rust), libs without binaries
               if not binary or pkg_type == "proto" or "engine-rag" in path:
                   continue
-              # CLI gets ldflags for version injection
+              # CLI gets ldflags for version injection; cli builds from root of its module
               if pkg_type == "cli":
-                  cmd = ["go", "build", "-ldflags", "${LDFLAGS}", "-o", f"dist/{binary}", f"./{path}/"]
+                  cmd = ["go", "build", "-ldflags", ldflags, "-o", f"{dist}/{binary}", "."]
               else:
-                  cmd = ["go", "build", "-o", f"dist/{binary}", f"./{path}/cmd/"]
+                  cmd = ["go", "build", "-o", f"{dist}/{binary}", "./cmd/"]
               print(f"  Building {binary} from {path}...")
-              result = subprocess.run(cmd, capture_output=True, text=True)
+              result = subprocess.run(cmd, capture_output=True, text=True, cwd=path)
               if result.returncode != 0:
                   print(f"  FAILED: {binary}", file=sys.stderr)
                   print(result.stderr, file=sys.stderr)
@@ -132,10 +135,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    env:
-      GOWORK: "off"
-      GONOSUMCHECK: github.com/orchestra-mcp/*
-      GONOSUMDB: github.com/orchestra-mcp/*
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -172,6 +171,6 @@ jobs:
         shell: bash
         run: |
           python3 -c 'import json;[print(p["path"]) for p in json.load(open("orchestra.lock"))["packages"] if p["type"] not in ("proto","cli") and "engine-rag" not in p.get("path","")]' | while read path; do
-            echo "go test ./${path}/... -v"
-            go test "./${path}/..." -v
+            echo "go test ${path}/..."
+            (cd "${path}" && go test ./... -v)
           done
