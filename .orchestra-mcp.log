@@ -1,20 +1,140 @@
-2026/02/27 11:19:15 orchestrator QUIC server listening on 127.0.0.1:64425
-2026/02/27 11:19:15 orchestrator listening on 127.0.0.1:64425
-2026/02/27 11:19:15 started plugin "storage.markdown" (pid=84805)
-2026/02/27 11:19:15 plugin "storage.markdown" ready at 127.0.0.1:63962
-2026/02/27 11:19:15 plugin "storage.markdown" registered and booted
-2026/02/27 11:19:15 plugin "storage.markdown" registered with router
-2026/02/27 11:19:15 started plugin "tools.features" (pid=84806)
-2026/02/27 11:19:15 plugin "tools.features" ready at 127.0.0.1:50624
-2026/02/27 11:19:15 plugin "tools.features" registered and booted
-2026/02/27 11:19:15 plugin "tools.features" registered with router
-2026/02/27 11:19:15 started plugin "tools.marketplace" (pid=84807)
-2026/02/27 11:19:15 plugin "tools.marketplace" ready at 127.0.0.1:61342
-2026/02/27 11:19:15 plugin "tools.marketplace" registered and booted
-2026/02/27 11:19:15 plugin "tools.marketplace" registered with router
-transport.stdio: connected to orchestrator at 127.0.0.1:64425
-2026/02/27 11:19:16 notification: notifications/initialized
-transport.stdio: connected to orchestrator at 127.0.0.1:64425
-transport.stdio: connected to orchestrator at 127.0.0.1:64425
-2026/02/27 11:19:16 notification: notifications/initialized
-2026/02/27 11:19:16 notification: notifications/initialized
+2026/03/01 03:50:02 TCP server error: tcp listen localhost:50101: listen tcp 127.0.0.1:50101: bind: address already in use
+2026/03/01 03:50:02 orchestrator QUIC server listening on 127.0.0.1:56637
+2026/03/01 03:50:02 TCP server error: tcp listen localhost:50101: listen tcp 127.0.0.1:50101: bind: address already in use
+2026/03/01 03:50:02 orchestrator QUIC server listening on 127.0.0.1:52394
+2026/03/01 03:50:02 orchestrator listening on 127.0.0.1:56637
+2026/03/01 03:50:02 started plugin "storage.markdown" (pid=706)
+2026/03/01 03:50:02 plugin "storage.markdown" ready at 127.0.0.1:49268
+2026/03/01 03:50:02 plugin "storage.markdown" registered and booted
+2026/03/01 03:50:02 plugin "storage.markdown" registered with router
+2026/03/01 03:50:02 orchestrator listening on 127.0.0.1:52394
+2026/03/01 03:50:02 started plugin "tools.features" (pid=707)
+2026/03/01 03:50:02 started plugin "storage.markdown" (pid=709)
+2026/03/01 03:50:02 plugin "tools.features" ready at 127.0.0.1:55076
+2026/03/01 03:50:02 plugin "storage.markdown" ready at 127.0.0.1:57525
+2026/03/01 03:50:02 plugin "storage.markdown" registered and booted
+2026/03/01 03:50:02 plugin "storage.markdown" registered with router
+2026/03/01 03:50:02 plugin "tools.features" registered and booted
+2026/03/01 03:50:02 plugin "tools.features" registered with router
+2026/03/01 03:50:02 started plugin "tools.features" (pid=711)
+2026/03/01 03:50:02 started plugin "tools.marketplace" (pid=714)
+2026/03/01 03:50:02 plugin "tools.features" ready at 127.0.0.1:54688
+2026/03/01 03:50:02 plugin "tools.marketplace" ready at 127.0.0.1:64380
+2026/03/01 03:50:02 plugin "tools.features" registered and booted
+2026/03/01 03:50:02 plugin "tools.features" registered with router
+2026/03/01 03:50:02 started plugin "tools.marketplace" (pid=717)
+2026/03/01 03:50:02 plugin "tools.marketplace" registered and booted
+2026/03/01 03:50:02 plugin "tools.marketplace" registered with router
+2026/03/01 03:50:02 started plugin "engine.rag" (pid=718)
+2026/03/01 03:50:02 [engine.rag] [2m2026-03-01T01:50:02.530828Z[0m [32m INFO[0m [2morchestra_rag[0m[2m:[0m starting orchestra-rag engine [3mworkspace[0m[2m=[0m/Users/fadymondy/Sites/orchestra-agents [3mlisten_addr[0m[2m=[0mlocalhost:0 [3morchestrator_addr[0m[2m=[0m127.0.0.1:56637
+2026/03/01 03:50:02 [engine.rag] [2m2026-03-01T01:50:02.531545Z[0m [32m INFO[0m [2morchestra_rag[0m[2m:[0m database initialized [3mdb[0m[2m=[0m/Users/fadymondy/Sites/orchestra-agents/.orchestra/rag.db
+2026/03/01 03:50:02 [engine.rag] 
+2026/03/01 03:50:02 [engine.rag] thread 'main' (15609096) panicked at src/tools/mod.rs:133:14:
+2026/03/01 03:50:02 [engine.rag] failed to create IndexManager for search tools: TantivyInit(LockFailure(LockBusy, Some("Failed to acquire index lock. If you are using a regular directory, this means there is already an `IndexWriter` working on this `Directory`, in this process or in a different process.")))
+2026/03/01 03:50:02 [engine.rag] note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026/03/01 03:50:02 failed to start plugin "engine.rag": plugin "engine.rag" exited without printing READY
+2026/03/01 03:50:02 plugin "tools.marketplace" ready at 127.0.0.1:61017
+2026/03/01 03:50:02 started plugin "bridge.claude" (pid=719)
+2026/03/01 03:50:02 plugin "tools.marketplace" registered and booted
+2026/03/01 03:50:02 plugin "tools.marketplace" registered with router
+2026/03/01 03:50:02 started plugin "engine.rag" (pid=720)
+2026/03/01 03:50:02 [engine.rag] [2m2026-03-01T01:50:02.539600Z[0m [32m INFO[0m [2morchestra_rag[0m[2m:[0m starting orchestra-rag engine [3mworkspace[0m[2m=[0m/Users/fadymondy/Sites/orchestra-agents [3mlisten_addr[0m[2m=[0mlocalhost:0 [3morchestrator_addr[0m[2m=[0m127.0.0.1:52394
+2026/03/01 03:50:02 [engine.rag] [2m2026-03-01T01:50:02.539989Z[0m [32m INFO[0m [2morchestra_rag[0m[2m:[0m database initialized [3mdb[0m[2m=[0m/Users/fadymondy/Sites/orchestra-agents/.orchestra/rag.db
+2026/03/01 03:50:02 [engine.rag] 
+2026/03/01 03:50:02 [engine.rag] thread 'main' (15609126) panicked at src/tools/mod.rs:133:14:
+2026/03/01 03:50:02 [engine.rag] failed to create IndexManager for search tools: TantivyInit(LockFailure(LockBusy, Some("Failed to acquire index lock. If you are using a regular directory, this means there is already an `IndexWriter` working on this `Directory`, in this process or in a different process.")))
+2026/03/01 03:50:02 [engine.rag] note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026/03/01 03:50:02 plugin "bridge.claude" ready at 127.0.0.1:52929
+2026/03/01 03:50:02 failed to start plugin "engine.rag": plugin "engine.rag" exited without printing READY
+2026/03/01 03:50:02 started plugin "bridge.claude" (pid=721)
+2026/03/01 03:50:02 plugin "bridge.claude" registered and booted
+2026/03/01 03:50:02 plugin "bridge.claude" registered with router
+2026/03/01 03:50:02 started plugin "bridge.openai" (pid=722)
+2026/03/01 03:50:02 plugin "bridge.claude" ready at 127.0.0.1:65254
+2026/03/01 03:50:02 plugin "bridge.claude" registered and booted
+2026/03/01 03:50:02 plugin "bridge.claude" registered with router
+2026/03/01 03:50:02 started plugin "bridge.openai" (pid=723)
+2026/03/01 03:50:02 plugin "bridge.openai" ready at 127.0.0.1:55587
+2026/03/01 03:50:02 plugin "bridge.openai" registered and booted
+2026/03/01 03:50:02 plugin "bridge.openai" registered with router
+2026/03/01 03:50:02 started plugin "bridge.gemini" (pid=724)
+2026/03/01 03:50:02 plugin "bridge.openai" ready at 127.0.0.1:52603
+2026/03/01 03:50:02 plugin "bridge.openai" registered and booted
+2026/03/01 03:50:02 plugin "bridge.openai" registered with router
+2026/03/01 03:50:02 started plugin "bridge.gemini" (pid=725)
+2026/03/01 03:50:02 plugin "bridge.gemini" ready at 127.0.0.1:59509
+2026/03/01 03:50:02 plugin "bridge.gemini" registered and booted
+2026/03/01 03:50:02 plugin "bridge.gemini" registered with router
+2026/03/01 03:50:02 started plugin "bridge.ollama" (pid=726)
+2026/03/01 03:50:02 plugin "bridge.gemini" ready at 127.0.0.1:64030
+2026/03/01 03:50:02 plugin "bridge.gemini" registered and booted
+2026/03/01 03:50:02 plugin "bridge.gemini" registered with router
+2026/03/01 03:50:02 started plugin "bridge.ollama" (pid=727)
+2026/03/01 03:50:02 plugin "bridge.ollama" ready at 127.0.0.1:64485
+2026/03/01 03:50:02 plugin "bridge.ollama" registered and booted
+2026/03/01 03:50:02 plugin "bridge.ollama" registered with router
+2026/03/01 03:50:02 plugin "bridge.ollama" ready at 127.0.0.1:57407
+2026/03/01 03:50:02 started plugin "bridge.firecrawl" (pid=728)
+2026/03/01 03:50:02 plugin "bridge.ollama" registered and booted
+2026/03/01 03:50:02 plugin "bridge.ollama" registered with router
+2026/03/01 03:50:02 started plugin "bridge.firecrawl" (pid=729)
+2026/03/01 03:50:02 plugin "bridge.firecrawl" ready at 127.0.0.1:55279
+2026/03/01 03:50:02 plugin "bridge.firecrawl" ready at 127.0.0.1:58490
+2026/03/01 03:50:02 plugin "bridge.firecrawl" registered and booted
+2026/03/01 03:50:02 plugin "bridge.firecrawl" registered with router
+2026/03/01 03:50:02 plugin "bridge.firecrawl" registered and booted
+2026/03/01 03:50:02 plugin "bridge.firecrawl" registered with router
+2026/03/01 03:50:02 started plugin "tools.agentops" (pid=730)
+2026/03/01 03:50:02 started plugin "tools.agentops" (pid=731)
+2026/03/01 03:50:02 plugin "tools.agentops" ready at 127.0.0.1:60128
+2026/03/01 03:50:02 plugin "tools.agentops" ready at 127.0.0.1:54720
+2026/03/01 03:50:02 plugin "tools.agentops" registered and booted
+2026/03/01 03:50:02 plugin "tools.agentops" registered with router
+2026/03/01 03:50:02 plugin "tools.agentops" registered and booted
+2026/03/01 03:50:02 plugin "tools.agentops" registered with router
+2026/03/01 03:50:02 started plugin "tools.sessions" (pid=733)
+2026/03/01 03:50:02 started plugin "tools.sessions" (pid=734)
+2026/03/01 03:50:02 plugin "tools.sessions" ready at 127.0.0.1:53688
+2026/03/01 03:50:02 plugin "tools.sessions" ready at 127.0.0.1:49972
+2026/03/01 03:50:02 plugin "tools.sessions" registered and booted
+2026/03/01 03:50:02 plugin "tools.sessions" registered with router
+2026/03/01 03:50:02 plugin "tools.sessions" registered and booted
+2026/03/01 03:50:02 plugin "tools.sessions" registered with router
+2026/03/01 03:50:02 started plugin "agent.orchestrator" (pid=739)
+2026/03/01 03:50:02 started plugin "agent.orchestrator" (pid=736)
+2026/03/01 03:50:02 plugin "agent.orchestrator" ready at 127.0.0.1:64329
+2026/03/01 03:50:02 plugin "agent.orchestrator" ready at 127.0.0.1:59456
+2026/03/01 03:50:02 plugin "agent.orchestrator" registered and booted
+2026/03/01 03:50:02 plugin "agent.orchestrator" registered with router
+2026/03/01 03:50:02 plugin "agent.orchestrator" registered and booted
+2026/03/01 03:50:02 plugin "agent.orchestrator" registered with router
+2026/03/01 03:50:02 started plugin "tools.workspace" (pid=740)
+2026/03/01 03:50:02 started plugin "tools.workspace" (pid=742)
+2026/03/01 03:50:02 plugin "tools.workspace" ready at 127.0.0.1:58834
+2026/03/01 03:50:02 plugin "tools.workspace" ready at 127.0.0.1:50701
+2026/03/01 03:50:02 plugin "tools.workspace" registered and booted
+2026/03/01 03:50:02 plugin "tools.workspace" registered with router
+2026/03/01 03:50:02 plugin "tools.workspace" registered and booted
+2026/03/01 03:50:02 plugin "tools.workspace" registered with router
+transport.stdio: connected to orchestrator at 127.0.0.1:56637
+transport.stdio: connected to orchestrator at 127.0.0.1:56637
+transport.quic-bridge: connected to orchestrator at 127.0.0.1:56637
+transport.quic-bridge: listening for remote clients on :9200
+2026/03/01 03:50:02 transport.quic-bridge: quic listen :9200: listen udp :9200: bind: address already in use
+2026/03/01 03:50:04 notification: notifications/initialized
+2026/03/01 03:50:04 notification: notifications/initialized
+2026/03/01 03:50:05 received signal terminated, shutting down
+2026/03/01 03:50:05 orchestrator shutting down
+2026/03/01 03:50:05 stopping all plugins
+2026/03/01 03:50:05 shutdown request to "tools.agentops" failed: open stream: Application error 0x0 (remote)
+2026/03/01 03:50:05 stopped plugin "tools.agentops"
+2026/03/01 03:50:07 connect to orchestrator at 127.0.0.1:56637: dial 127.0.0.1:56637: timeout: no recent network activity
+2026/03/01 03:52:41 received signal terminated, shutting down
+2026/03/01 03:52:41 orchestrator shutting down
+2026/03/01 03:52:41 stopping all plugins
+2026/03/01 03:52:41 shutdown request to "tools.agentops" failed: open stream: Application error 0x0 (remote)
+2026/03/01 03:52:41 stopped plugin "tools.agentops"
+2026/03/01 03:52:41 shutdown request to "bridge.claude" failed: open stream: Application error 0x0 (remote)
+2026/03/01 03:52:41 stopped plugin "bridge.claude"
+2026/03/01 03:52:41 shutdown request to "bridge.gemini" failed: open stream: Application error 0x0 (remote)
+2026/03/01 03:52:41 stopped plugin "bridge.gemini"

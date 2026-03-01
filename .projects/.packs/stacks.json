@@ -1,8 +1,5 @@
 ---
 stacks:
-    - go
-    - rust
-    - react
-    - docker
+    - swift
 ---
 

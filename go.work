@@ -1,12 +1,47 @@
-go 1.23
+go 1.24.0
 
 use (
+	./apps/web
 	./libs/cli
 	./libs/gen-go
-	./libs/sdk-go
 	./libs/orchestrator
+	./libs/plugin-agent-orchestrator
+	./libs/plugin-ai-browser-context
+	./libs/plugin-ai-screen-reader
+	./libs/plugin-ai-screenshot
+	./libs/plugin-ai-vision
+	./libs/plugin-bridge-claude
+	./libs/plugin-bridge-firecrawl
+	./libs/plugin-bridge-gemini
+	./libs/plugin-bridge-ollama
+	./libs/plugin-bridge-openai
+	./libs/plugin-devtools-components
+	./libs/plugin-devtools-database
+	./libs/plugin-devtools-debugger
+	./libs/plugin-devtools-devops
+	./libs/plugin-devtools-docker
+	./libs/plugin-devtools-file-explorer
+	./libs/plugin-devtools-git
+	./libs/plugin-devtools-log-viewer
+	./libs/plugin-devtools-services
+	./libs/plugin-devtools-ssh
+	./libs/plugin-devtools-terminal
+	./libs/plugin-devtools-test-runner
+	./libs/plugin-integration-figma
+	./libs/plugin-services-notifications
+	./libs/plugin-services-voice
 	./libs/plugin-storage-markdown
+	./libs/plugin-tools-agentops
+	./libs/plugin-tools-docs
+	./libs/plugin-tools-extension-generator
 	./libs/plugin-tools-features
-	./libs/plugin-transport-stdio
+	./libs/plugin-tools-markdown
 	./libs/plugin-tools-marketplace
+	./libs/plugin-tools-notes
+	./libs/plugin-tools-sessions
+	./libs/plugin-tools-workspace
+	./libs/plugin-transport-quic-bridge
+	./libs/plugin-transport-stdio
+	./libs/plugin-transport-webtransport
+	./libs/sdk-go
 )

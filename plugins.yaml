@@ -16,3 +16,59 @@ plugins:
     enabled: true
     args:
       - --workspace=.
+  - id: engine.rag
+    binary: ./bin/engine-rag
+    enabled: true
+    args:
+      - --workspace=.
+  - id: bridge.claude
+    binary: ./bin/bridge-claude
+    enabled: true
+    provides_ai:
+      - claude
+  - id: bridge.openai
+    binary: ./bin/bridge-openai
+    enabled: true
+    provides_ai:
+      - openai
+      - grok
+      - perplexity
+      - deepseek
+      - qwen
+      - kimi
+  - id: bridge.gemini
+    binary: ./bin/bridge-gemini
+    enabled: true
+    provides_ai:
+      - gemini
+  - id: bridge.ollama
+    binary: ./bin/bridge-ollama
+    enabled: true
+    provides_ai:
+      - ollama
+  - id: bridge.firecrawl
+    binary: ./bin/bridge-firecrawl
+    enabled: true
+  - id: tools.agentops
+    binary: ./bin/tools-agentops
+    enabled: true
+  - id: tools.sessions
+    binary: ./bin/tools-sessions
+    enabled: true
+  - id: agent.orchestrator
+    binary: ./bin/agent-orchestrator
+    enabled: true
+  - id: tools.markdown
+    binary: ./bin/tools-markdown
+    enabled: true
+  - id: tools.notes
+    binary: ./bin/tools-notes
+    enabled: true
+  - id: tools.docs
+    binary: ./bin/tools-docs
+    enabled: true
+    depends_on:
+      - tools.markdown
+  - id: devtools.git
+    binary: ./bin/devtools-git
+    enabled: true

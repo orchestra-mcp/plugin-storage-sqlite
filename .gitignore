@@ -38,3 +38,7 @@ packs/
 
 # Old reference (tracked separately)
 orch-ref/
+web/
+mobile/
+packages/
+apps/

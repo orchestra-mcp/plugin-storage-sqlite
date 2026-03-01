@@ -7,7 +7,7 @@
     "packages": [
         {
             "name": "orchestra-mcp/proto",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/proto.git",
@@ -20,7 +20,7 @@
         },
         {
             "name": "orchestra-mcp/gen-go",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/gen-go.git",
@@ -36,7 +36,7 @@
         },
         {
             "name": "orchestra-mcp/sdk-go",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/sdk-go.git",
@@ -52,7 +52,7 @@
         },
         {
             "name": "orchestra-mcp/orchestrator",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/orchestrator.git",
@@ -69,7 +69,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-storage-markdown",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-storage-markdown.git",
@@ -86,7 +86,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-tools-features",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-tools-features.git",
@@ -103,7 +103,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-transport-stdio",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-transport-stdio.git",
@@ -120,7 +120,7 @@
         },
         {
             "name": "orchestra-mcp/plugin-tools-marketplace",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/plugin-tools-marketplace.git",
@@ -136,8 +136,603 @@
             }
         },
         {
+            "name": "orchestra-mcp/plugin-engine-rag",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-engine-rag.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "engine-rag tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-engine-rag",
+            "binary": "engine-rag",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-transport-webtransport",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-transport-webtransport.git",
+                "reference": "master"
+            },
+            "type": "transport",
+            "description": "transport-webtransport transport plugin for Orchestra MCP.",
+            "path": "libs/plugin-transport-webtransport",
+            "binary": "transport-webtransport",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-bridge-claude",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-bridge-claude.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "bridge-claude tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-bridge-claude",
+            "binary": "bridge-claude",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-agentops",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-agentops.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-agentops tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-agentops",
+            "binary": "tools-agentops",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-sessions",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-sessions.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-sessions tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-sessions",
+            "binary": "tools-sessions",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-transport-quic-bridge",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-transport-quic-bridge.git",
+                "reference": "master"
+            },
+            "type": "transport",
+            "description": "transport-quic-bridge transport plugin for Orchestra MCP.",
+            "path": "libs/plugin-transport-quic-bridge",
+            "binary": "transport-quic-bridge",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-bridge-openai",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-bridge-openai.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "bridge-openai tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-bridge-openai",
+            "binary": "bridge-openai",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-bridge-gemini",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-bridge-gemini.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "bridge-gemini tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-bridge-gemini",
+            "binary": "bridge-gemini",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-bridge-ollama",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-bridge-ollama.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "bridge-ollama tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-bridge-ollama",
+            "binary": "bridge-ollama",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-bridge-firecrawl",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-bridge-firecrawl.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "bridge-firecrawl tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-bridge-firecrawl",
+            "binary": "bridge-firecrawl",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-markdown",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-markdown.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-markdown tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-markdown",
+            "binary": "tools-markdown",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-docs",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-docs.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-docs tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-docs",
+            "binary": "tools-docs",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-notes",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-notes.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-notes tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-notes",
+            "binary": "tools-notes",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-git",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-git.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-git tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-git",
+            "binary": "devtools-git",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-agent-orchestrator",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-agent-orchestrator.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "agent-orchestrator tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-agent-orchestrator",
+            "binary": "agent-orchestrator",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-ai-screenshot",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-ai-screenshot.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "ai-screenshot tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-ai-screenshot",
+            "binary": "ai-screenshot",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-ai-vision",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-ai-vision.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "ai-vision tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-ai-vision",
+            "binary": "ai-vision",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-ai-browser-context",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-ai-browser-context.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "ai-browser-context tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-ai-browser-context",
+            "binary": "ai-browser-context",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-ai-screen-reader",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-ai-screen-reader.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "ai-screen-reader tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-ai-screen-reader",
+            "binary": "ai-screen-reader",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-services-voice",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-services-voice.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "services-voice tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-services-voice",
+            "binary": "services-voice",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-services-notifications",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-services-notifications.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "services-notifications tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-services-notifications",
+            "binary": "services-notifications",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-extension-generator",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-extension-generator.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "tools-extension-generator tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-tools-extension-generator",
+            "binary": "tools-extension-generator",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-file-explorer",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-file-explorer.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-file-explorer tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-file-explorer",
+            "binary": "devtools-file-explorer",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-terminal",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-terminal.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-terminal tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-terminal",
+            "binary": "devtools-terminal",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-ssh",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-ssh.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-ssh tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-ssh",
+            "binary": "devtools-ssh",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-services",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-services.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-services tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-services",
+            "binary": "devtools-services",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-docker",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-docker.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-docker tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-docker",
+            "binary": "devtools-docker",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-debugger",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-debugger.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-debugger tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-debugger",
+            "binary": "devtools-debugger",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-test-runner",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-test-runner.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-test-runner tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-test-runner",
+            "binary": "devtools-test-runner",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-log-viewer",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-log-viewer.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-log-viewer tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-log-viewer",
+            "binary": "devtools-log-viewer",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-database",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-database.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-database tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-database",
+            "binary": "devtools-database",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-devops",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-devops.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-devops tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-devops",
+            "binary": "devtools-devops",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-integration-figma",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-integration-figma.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "integration-figma tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-integration-figma",
+            "binary": "integration-figma",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-devtools-components",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-devtools-components.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "devtools-components tools plugin for Orchestra MCP.",
+            "path": "libs/plugin-devtools-components",
+            "binary": "devtools-components",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
+            "name": "orchestra-mcp/plugin-tools-workspace",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestra-mcp/plugin-tools-workspace.git",
+                "reference": "master"
+            },
+            "type": "tools",
+            "description": "Multi-folder workspace management with switching support.",
+            "path": "libs/plugin-tools-workspace",
+            "binary": "tools-workspace",
+            "require": {
+                "orchestra-mcp/gen-go": "^0.1.0",
+                "orchestra-mcp/sdk-go": "^0.1.0"
+            }
+        },
+        {
             "name": "orchestra-mcp/cli",
-            "version": "v0.0.3-beta",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestra-mcp/cli.git",
