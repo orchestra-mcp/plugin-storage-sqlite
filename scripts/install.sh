@@ -15,6 +15,7 @@ set -e
 GITHUB_REPO="${GITHUB_REPO:-orchestra-mcp/framework}"
 VERSION="${VERSION:-latest}"
 EXE=""
+CURL_EXTRA=""
 
 # Detect OS and architecture.
 detect_platform() {
@@ -27,6 +28,8 @@ detect_platform() {
         MINGW*|MSYS*|CYGWIN*)
             OS="windows"
             EXE=".exe"
+            # Windows Schannel may fail revocation checks behind proxies/firewalls.
+            CURL_EXTRA="--ssl-revoke-best-effort"
             ;;
         *)
             echo "Error: Unsupported OS: $RAW_OS" >&2
@@ -63,7 +66,7 @@ resolve_url() {
         # GitHub /releases/latest only returns non-prerelease. Use API to get the
         # most recent release (including prereleases).
         if command -v curl >/dev/null 2>&1; then
-            VERSION="$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases" \
+            VERSION="$(curl -fsSL $CURL_EXTRA "https://api.github.com/repos/${GITHUB_REPO}/releases" \
                 | grep -m1 '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
         elif command -v wget >/dev/null 2>&1; then
             VERSION="$(wget -qO- "https://api.github.com/repos/${GITHUB_REPO}/releases" \
@@ -93,7 +96,7 @@ install() {
 
     echo "Downloading ${URL}..."
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$URL" -o "${TMP_DIR}/orchestra.tar.gz"
+        curl -fsSL $CURL_EXTRA "$URL" -o "${TMP_DIR}/orchestra.tar.gz"
     elif command -v wget >/dev/null 2>&1; then
         wget -q "$URL" -O "${TMP_DIR}/orchestra.tar.gz"
     else
