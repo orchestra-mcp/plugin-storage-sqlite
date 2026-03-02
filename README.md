@@ -99,23 +99,23 @@ orchestra pack recommend                # Recommend packs for your project
 
 | Plugin | Tools | Description |
 |--------|-------|-------------|
-| `storage.markdown` | — | File storage with YAML frontmatter + Markdown body |
-| `tools.features` | 34 | Feature-driven workflow (11-state lifecycle) |
-| `tools.marketplace` | 15+5p | Pack management and marketplace |
-| `transport.stdio` | — | MCP JSON-RPC bridge (stdin/stdout) |
+| [`storage.markdown`](https://github.com/orchestra-mcp/plugin-storage-markdown) | — | File storage with YAML frontmatter + Markdown body |
+| [`tools.features`](https://github.com/orchestra-mcp/plugin-tools-features) | 34 | Feature-driven workflow (11-state lifecycle) |
+| [`tools.marketplace`](https://github.com/orchestra-mcp/plugin-tools-marketplace) | 15+5p | Pack management and marketplace |
+| [`transport.stdio`](https://github.com/orchestra-mcp/plugin-transport-stdio) | — | MCP JSON-RPC bridge (stdin/stdout) |
 
 ### Optional Plugins (install separately)
 
 | Category | Plugins | Tools |
 |----------|---------|-------|
-| **AI Bridges** | bridge.claude, bridge.openai, bridge.gemini, bridge.ollama, bridge.firecrawl | 25 |
-| **Agent** | agent.orchestrator | 20 |
-| **DevTools** | devtools.git, devtools.docker, devtools.terminal, devtools.ssh, devtools.file-explorer, devtools.database, devtools.debugger, devtools.test-runner, devtools.log-viewer, devtools.services, devtools.devops, devtools.components | 110+ |
-| **AI Awareness** | ai.screenshot, ai.vision, ai.browser-context, ai.screen-reader | 25 |
-| **Tools** | tools.agentops, tools.sessions, tools.workspace, tools.notes, tools.docs, tools.markdown, tools.extension-generator | 56 |
-| **Services** | services.voice, services.notifications | 16 |
-| **Integration** | integration.figma | 6 |
-| **Transport** | transport.quic-bridge, transport.webtransport | — |
+| **AI Bridges** | [bridge.claude](https://github.com/orchestra-mcp/plugin-bridge-claude), [bridge.openai](https://github.com/orchestra-mcp/plugin-bridge-openai), [bridge.gemini](https://github.com/orchestra-mcp/plugin-bridge-gemini), [bridge.ollama](https://github.com/orchestra-mcp/plugin-bridge-ollama), [bridge.firecrawl](https://github.com/orchestra-mcp/plugin-bridge-firecrawl) | 25 |
+| **Agent** | [agent.orchestrator](https://github.com/orchestra-mcp/plugin-agent-orchestrator) | 20 |
+| **DevTools** | [devtools.git](https://github.com/orchestra-mcp/plugin-devtools-git), [devtools.docker](https://github.com/orchestra-mcp/plugin-devtools-docker), [devtools.terminal](https://github.com/orchestra-mcp/plugin-devtools-terminal), [devtools.ssh](https://github.com/orchestra-mcp/plugin-devtools-ssh), [devtools.file-explorer](https://github.com/orchestra-mcp/plugin-devtools-file-explorer), [devtools.database](https://github.com/orchestra-mcp/plugin-devtools-database), [devtools.debugger](https://github.com/orchestra-mcp/plugin-devtools-debugger), [devtools.test-runner](https://github.com/orchestra-mcp/plugin-devtools-test-runner), [devtools.log-viewer](https://github.com/orchestra-mcp/plugin-devtools-log-viewer), [devtools.services](https://github.com/orchestra-mcp/plugin-devtools-services), [devtools.devops](https://github.com/orchestra-mcp/plugin-devtools-devops), [devtools.components](https://github.com/orchestra-mcp/plugin-devtools-components) | 110+ |
+| **AI Awareness** | [ai.screenshot](https://github.com/orchestra-mcp/plugin-ai-screenshot), [ai.vision](https://github.com/orchestra-mcp/plugin-ai-vision), [ai.browser-context](https://github.com/orchestra-mcp/plugin-ai-browser-context), [ai.screen-reader](https://github.com/orchestra-mcp/plugin-ai-screen-reader) | 25 |
+| **Tools** | [tools.agentops](https://github.com/orchestra-mcp/plugin-tools-agentops), [tools.sessions](https://github.com/orchestra-mcp/plugin-tools-sessions), [tools.workspace](https://github.com/orchestra-mcp/plugin-tools-workspace), [tools.notes](https://github.com/orchestra-mcp/plugin-tools-notes), [tools.docs](https://github.com/orchestra-mcp/plugin-tools-docs), [tools.markdown](https://github.com/orchestra-mcp/plugin-tools-markdown), [tools.extension-generator](https://github.com/orchestra-mcp/plugin-tools-extension-generator) | 56 |
+| **Services** | [services.voice](https://github.com/orchestra-mcp/plugin-services-voice), [services.notifications](https://github.com/orchestra-mcp/plugin-services-notifications) | 16 |
+| **Integration** | [integration.figma](https://github.com/orchestra-mcp/plugin-integration-figma) | 6 |
+| **Transport** | [transport.quic-bridge](https://github.com/orchestra-mcp/plugin-transport-quic-bridge), [transport.webtransport](https://github.com/orchestra-mcp/plugin-transport-webtransport) | — |
 
 ```bash
 # Install a plugin
@@ -131,23 +131,23 @@ Packs are installable bundles of skills (slash commands), agents (specialized su
 
 | Pack | Stacks | Contents |
 |------|--------|----------|
-| `pack-essentials` | all | project-manager, qa-testing, docs, scrum-master, devops |
-| `pack-go-backend` | go | go-backend skill, go-architect + qa-go agents |
-| `pack-rust-engine` | rust | rust-engine skill, rust-engineer + qa-rust agents |
-| `pack-react-frontend` | react, ts | typescript-react, ui-design, tailwind skills |
-| `pack-database` | all | database-sync skill, dba + postgres/sqlite/redis agents |
-| `pack-ai` | all | ai-agentic skill, ai-engineer + lancedb agents |
-| `pack-proto` | go, rust | proto-grpc skill, quic-protocol agent |
-| `pack-desktop` | go, swift | wails, macos, native-widgets skills |
-| `pack-mobile` | react | react-native skill, mobile-dev agent |
-| `pack-chrome` | typescript | chrome-extension skill |
-| `pack-infra` | all | gcp-infrastructure skill, devops agent |
-| `pack-extensions` | all | native-extensions, raycast, vscode skills |
-| `pack-analytics` | all | clickhouse-engineer agent |
-| `pack-native-swift` | swift | swift-plugin agent |
-| `pack-native-kotlin` | kotlin | kotlin-plugin agent |
-| `pack-native-csharp` | csharp | csharp-plugin agent |
-| `pack-native-gtk` | c | gtk-plugin agent |
+| [`pack-essentials`](https://github.com/orchestra-mcp/pack-essentials) | all | project-manager, qa-testing, docs, scrum-master, devops |
+| [`pack-go-backend`](https://github.com/orchestra-mcp/pack-go-backend) | go | go-backend skill, go-architect + qa-go agents |
+| [`pack-rust-engine`](https://github.com/orchestra-mcp/pack-rust-engine) | rust | rust-engine skill, rust-engineer + qa-rust agents |
+| [`pack-react-frontend`](https://github.com/orchestra-mcp/pack-react-frontend) | react, ts | typescript-react, ui-design, tailwind skills |
+| [`pack-database`](https://github.com/orchestra-mcp/pack-database) | all | database-sync skill, dba + postgres/sqlite/redis agents |
+| [`pack-ai`](https://github.com/orchestra-mcp/pack-ai) | all | ai-agentic skill, ai-engineer + lancedb agents |
+| [`pack-proto`](https://github.com/orchestra-mcp/pack-proto) | go, rust | proto-grpc skill, quic-protocol agent |
+| [`pack-desktop`](https://github.com/orchestra-mcp/pack-desktop) | go, swift | wails, macos, native-widgets skills |
+| [`pack-mobile`](https://github.com/orchestra-mcp/pack-mobile) | react | react-native skill, mobile-dev agent |
+| [`pack-chrome`](https://github.com/orchestra-mcp/pack-chrome) | typescript | chrome-extension skill |
+| [`pack-infra`](https://github.com/orchestra-mcp/pack-infra) | all | gcp-infrastructure skill, devops agent |
+| [`pack-extensions`](https://github.com/orchestra-mcp/pack-extensions) | all | native-extensions, raycast, vscode skills |
+| [`pack-analytics`](https://github.com/orchestra-mcp/pack-analytics) | all | clickhouse-engineer agent |
+| [`pack-native-swift`](https://github.com/orchestra-mcp/pack-native-swift) | swift | swift-plugin agent |
+| [`pack-native-kotlin`](https://github.com/orchestra-mcp/pack-native-kotlin) | kotlin | kotlin-plugin agent |
+| [`pack-native-csharp`](https://github.com/orchestra-mcp/pack-native-csharp) | csharp | csharp-plugin agent |
+| [`pack-native-gtk`](https://github.com/orchestra-mcp/pack-native-gtk) | c | gtk-plugin agent |
 
 ```bash
 orchestra pack install github.com/orchestra-mcp/pack-go-backend
@@ -302,25 +302,45 @@ All inter-plugin communication uses length-delimited Protobuf over QUIC with mTL
 
 ## Module Paths
 
-All 44 packages are published as independent Go modules under `github.com/orchestra-mcp/`:
+All 44 packages are published as independent Go modules under [`github.com/orchestra-mcp/`](https://github.com/orchestra-mcp):
 
-```
-proto, gen-go, sdk-go, orchestrator, cli,
-plugin-storage-markdown, plugin-tools-features, plugin-tools-marketplace,
-plugin-transport-stdio, plugin-bridge-claude, plugin-bridge-openai,
-plugin-bridge-gemini, plugin-bridge-ollama, plugin-bridge-firecrawl,
-plugin-agent-orchestrator, plugin-tools-agentops, plugin-tools-sessions,
-plugin-tools-workspace, plugin-tools-notes, plugin-tools-docs,
-plugin-tools-markdown, plugin-tools-extension-generator,
-plugin-devtools-git, plugin-devtools-docker, plugin-devtools-terminal,
-plugin-devtools-ssh, plugin-devtools-file-explorer, plugin-devtools-database,
-plugin-devtools-debugger, plugin-devtools-test-runner, plugin-devtools-log-viewer,
-plugin-devtools-services, plugin-devtools-devops, plugin-devtools-components,
-plugin-ai-screenshot, plugin-ai-vision, plugin-ai-browser-context,
-plugin-ai-screen-reader, plugin-services-voice, plugin-services-notifications,
-plugin-integration-figma, plugin-transport-quic-bridge,
-plugin-transport-webtransport, plugin-engine-rag
-```
+| Core | Plugins (Core) | Plugins (Optional) |
+|------|----------------|-------------------|
+| [proto](https://github.com/orchestra-mcp/proto) | [plugin-storage-markdown](https://github.com/orchestra-mcp/plugin-storage-markdown) | [plugin-bridge-claude](https://github.com/orchestra-mcp/plugin-bridge-claude) |
+| [gen-go](https://github.com/orchestra-mcp/gen-go) | [plugin-tools-features](https://github.com/orchestra-mcp/plugin-tools-features) | [plugin-bridge-openai](https://github.com/orchestra-mcp/plugin-bridge-openai) |
+| [sdk-go](https://github.com/orchestra-mcp/sdk-go) | [plugin-tools-marketplace](https://github.com/orchestra-mcp/plugin-tools-marketplace) | [plugin-bridge-gemini](https://github.com/orchestra-mcp/plugin-bridge-gemini) |
+| [orchestrator](https://github.com/orchestra-mcp/orchestrator) | [plugin-transport-stdio](https://github.com/orchestra-mcp/plugin-transport-stdio) | [plugin-bridge-ollama](https://github.com/orchestra-mcp/plugin-bridge-ollama) |
+| [cli](https://github.com/orchestra-mcp/cli) | | [plugin-bridge-firecrawl](https://github.com/orchestra-mcp/plugin-bridge-firecrawl) |
+| | | [plugin-agent-orchestrator](https://github.com/orchestra-mcp/plugin-agent-orchestrator) |
+| | | [plugin-tools-agentops](https://github.com/orchestra-mcp/plugin-tools-agentops) |
+| | | [plugin-tools-sessions](https://github.com/orchestra-mcp/plugin-tools-sessions) |
+| | | [plugin-tools-workspace](https://github.com/orchestra-mcp/plugin-tools-workspace) |
+| | | [plugin-tools-notes](https://github.com/orchestra-mcp/plugin-tools-notes) |
+| | | [plugin-tools-docs](https://github.com/orchestra-mcp/plugin-tools-docs) |
+| | | [plugin-tools-markdown](https://github.com/orchestra-mcp/plugin-tools-markdown) |
+| | | [plugin-tools-extension-generator](https://github.com/orchestra-mcp/plugin-tools-extension-generator) |
+| | | [plugin-devtools-git](https://github.com/orchestra-mcp/plugin-devtools-git) |
+| | | [plugin-devtools-docker](https://github.com/orchestra-mcp/plugin-devtools-docker) |
+| | | [plugin-devtools-terminal](https://github.com/orchestra-mcp/plugin-devtools-terminal) |
+| | | [plugin-devtools-ssh](https://github.com/orchestra-mcp/plugin-devtools-ssh) |
+| | | [plugin-devtools-file-explorer](https://github.com/orchestra-mcp/plugin-devtools-file-explorer) |
+| | | [plugin-devtools-database](https://github.com/orchestra-mcp/plugin-devtools-database) |
+| | | [plugin-devtools-debugger](https://github.com/orchestra-mcp/plugin-devtools-debugger) |
+| | | [plugin-devtools-test-runner](https://github.com/orchestra-mcp/plugin-devtools-test-runner) |
+| | | [plugin-devtools-log-viewer](https://github.com/orchestra-mcp/plugin-devtools-log-viewer) |
+| | | [plugin-devtools-services](https://github.com/orchestra-mcp/plugin-devtools-services) |
+| | | [plugin-devtools-devops](https://github.com/orchestra-mcp/plugin-devtools-devops) |
+| | | [plugin-devtools-components](https://github.com/orchestra-mcp/plugin-devtools-components) |
+| | | [plugin-ai-screenshot](https://github.com/orchestra-mcp/plugin-ai-screenshot) |
+| | | [plugin-ai-vision](https://github.com/orchestra-mcp/plugin-ai-vision) |
+| | | [plugin-ai-browser-context](https://github.com/orchestra-mcp/plugin-ai-browser-context) |
+| | | [plugin-ai-screen-reader](https://github.com/orchestra-mcp/plugin-ai-screen-reader) |
+| | | [plugin-services-voice](https://github.com/orchestra-mcp/plugin-services-voice) |
+| | | [plugin-services-notifications](https://github.com/orchestra-mcp/plugin-services-notifications) |
+| | | [plugin-integration-figma](https://github.com/orchestra-mcp/plugin-integration-figma) |
+| | | [plugin-transport-quic-bridge](https://github.com/orchestra-mcp/plugin-transport-quic-bridge) |
+| | | [plugin-transport-webtransport](https://github.com/orchestra-mcp/plugin-transport-webtransport) |
+| | | [plugin-engine-rag](https://github.com/orchestra-mcp/plugin-engine-rag) |
 
 ## Contributing
 
