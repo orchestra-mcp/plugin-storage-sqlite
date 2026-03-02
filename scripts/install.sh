@@ -149,6 +149,13 @@ install() {
         echo "Version: $(orchestra${EXE} version)"
     else
         echo "Note: Add ${INSTALL_DIR} to your PATH if not already there."
+        if [ "$OS" = "windows" ]; then
+            echo ""
+            echo "  Run this in PowerShell (as Administrator):"
+            echo "    [Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';${INSTALL_DIR}', 'User')"
+            echo ""
+            echo "  Then restart your terminal."
+        fi
     fi
 }
 
