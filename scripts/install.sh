@@ -12,21 +12,25 @@
 #
 set -e
 
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 GITHUB_REPO="${GITHUB_REPO:-orchestra-mcp/framework}"
 VERSION="${VERSION:-latest}"
+EXE=""
 
 # Detect OS and architecture.
 detect_platform() {
-    OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    RAW_OS="$(uname -s)"
     ARCH="$(uname -m)"
 
-    case "$OS" in
-        darwin) OS="darwin" ;;
-        linux)  OS="linux" ;;
+    case "$RAW_OS" in
+        Darwin*)          OS="darwin" ;;
+        Linux*)           OS="linux" ;;
+        MINGW*|MSYS*|CYGWIN*)
+            OS="windows"
+            EXE=".exe"
+            ;;
         *)
-            echo "Error: Unsupported OS: $OS" >&2
-            echo "Orchestra supports macOS and Linux." >&2
+            echo "Error: Unsupported OS: $RAW_OS" >&2
+            echo "Orchestra supports macOS, Linux, and Windows (Git Bash)." >&2
             exit 1
             ;;
     esac
@@ -40,6 +44,15 @@ detect_platform() {
             exit 1
             ;;
     esac
+
+    # Default install dir per platform.
+    if [ -z "${INSTALL_DIR:-}" ]; then
+        if [ "$OS" = "windows" ]; then
+            INSTALL_DIR="${LOCALAPPDATA:-$HOME/AppData/Local}/Orchestra/bin"
+        else
+            INSTALL_DIR="/usr/local/bin"
+        fi
+    fi
 
     PLATFORM="${OS}-${ARCH}"
 }
@@ -93,26 +106,30 @@ install() {
 
     echo "Installing to ${INSTALL_DIR}..."
 
-    # Check write permissions, use sudo if needed.
+    # Check write permissions, use sudo if needed (skip sudo on Windows).
     SUDO=""
-    if [ ! -w "$INSTALL_DIR" ] 2>/dev/null || { [ ! -d "$INSTALL_DIR" ] && ! mkdir -p "$INSTALL_DIR" 2>/dev/null; }; then
-        if command -v sudo >/dev/null 2>&1; then
-            echo "  (need sudo for ${INSTALL_DIR})"
-            SUDO="sudo"
-        else
-            echo "Error: No write permission to ${INSTALL_DIR} and sudo not available." >&2
-            echo "Try: INSTALL_DIR=~/.local/bin sh install.sh" >&2
-            exit 1
+    if [ "$OS" != "windows" ]; then
+        if [ ! -w "$INSTALL_DIR" ] 2>/dev/null || { [ ! -d "$INSTALL_DIR" ] && ! mkdir -p "$INSTALL_DIR" 2>/dev/null; }; then
+            if command -v sudo >/dev/null 2>&1; then
+                echo "  (need sudo for ${INSTALL_DIR})"
+                SUDO="sudo"
+            else
+                echo "Error: No write permission to ${INSTALL_DIR} and sudo not available." >&2
+                echo "Try: INSTALL_DIR=~/.local/bin sh install.sh" >&2
+                exit 1
+            fi
         fi
     fi
 
     $SUDO mkdir -p "$INSTALL_DIR"
 
     for bin in orchestra orchestrator storage-markdown tools-features transport-stdio tools-marketplace; do
-        if [ -f "${TMP_DIR}/${bin}" ]; then
-            $SUDO cp "${TMP_DIR}/${bin}" "${INSTALL_DIR}/${bin}"
-            $SUDO chmod +x "${INSTALL_DIR}/${bin}"
-            echo "  installed ${INSTALL_DIR}/${bin}"
+        if [ -f "${TMP_DIR}/${bin}${EXE}" ]; then
+            $SUDO cp "${TMP_DIR}/${bin}${EXE}" "${INSTALL_DIR}/${bin}${EXE}"
+            if [ "$OS" != "windows" ]; then
+                $SUDO chmod +x "${INSTALL_DIR}/${bin}${EXE}"
+            fi
+            echo "  installed ${INSTALL_DIR}/${bin}${EXE}"
         fi
     done
 
@@ -125,8 +142,8 @@ install() {
     echo ""
 
     # Verify it works.
-    if command -v orchestra >/dev/null 2>&1; then
-        echo "Version: $(orchestra version)"
+    if command -v "orchestra${EXE}" >/dev/null 2>&1; then
+        echo "Version: $(orchestra${EXE} version)"
     else
         echo "Note: Add ${INSTALL_DIR} to your PATH if not already there."
     fi

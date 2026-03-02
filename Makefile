@@ -140,6 +140,17 @@ release:
 			rm -f $(DIST_DIR)/orchestra $(DIST_DIR)/orchestrator $(DIST_DIR)/storage-markdown $(DIST_DIR)/tools-features $(DIST_DIR)/transport-stdio $(DIST_DIR)/tools-marketplace; \
 		done; \
 	done
+	@for goarch in amd64; do \
+		echo "Building windows/$$goarch..."; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/cli && go build -ldflags "$(LDFLAGS)" -o $(ROOT_DIR)/$(DIST_DIR)/orchestra.exe .'; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/orchestrator && go build -o $(ROOT_DIR)/$(DIST_DIR)/orchestrator.exe ./cmd/'; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/plugin-storage-markdown && go build -o $(ROOT_DIR)/$(DIST_DIR)/storage-markdown.exe ./cmd/'; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/plugin-tools-features && go build -o $(ROOT_DIR)/$(DIST_DIR)/tools-features.exe ./cmd/'; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/plugin-transport-stdio && go build -o $(ROOT_DIR)/$(DIST_DIR)/transport-stdio.exe ./cmd/'; \
+		GOOS=windows GOARCH=$$goarch sh -c 'cd libs/plugin-tools-marketplace && go build -o $(ROOT_DIR)/$(DIST_DIR)/tools-marketplace.exe ./cmd/'; \
+		tar -czf $(DIST_DIR)/orchestra-windows-$$goarch.tar.gz -C $(DIST_DIR) orchestra.exe orchestrator.exe storage-markdown.exe tools-features.exe transport-stdio.exe tools-marketplace.exe; \
+		rm -f $(DIST_DIR)/orchestra.exe $(DIST_DIR)/orchestrator.exe $(DIST_DIR)/storage-markdown.exe $(DIST_DIR)/tools-features.exe $(DIST_DIR)/transport-stdio.exe $(DIST_DIR)/tools-marketplace.exe; \
+	done
 	@echo "\nRelease tarballs in $(DIST_DIR)/"
 	@ls -lh $(DIST_DIR)/*.tar.gz
 

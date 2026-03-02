@@ -28,6 +28,9 @@ jobs:
           - goos: linux
             goarch: arm64
             runner: ubuntu-latest
+          - goos: windows
+            goarch: amd64
+            runner: windows-latest
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -99,23 +102,26 @@ jobs:
           lock = json.load(open("orchestra.lock"))
           dist = os.environ["DIST"]
           ldflags = os.environ["LDFLAGS"]
+          goos = os.environ.get("GOOS", "")
+          ext = ".exe" if goos == "windows" else ""
           for pkg in lock["packages"]:
               binary = pkg.get("binary")
               path = pkg.get("path", "")
               pkg_type = pkg.get("type", "")
               if not binary or pkg_type == "proto" or "engine-rag" in path:
                   continue
+              out_name = binary + ext
               if pkg_type == "cli":
-                  cmd = ["go", "build", "-ldflags", ldflags, "-o", f"{dist}/{binary}", "."]
+                  cmd = ["go", "build", "-ldflags", ldflags, "-o", f"{dist}/{out_name}", "."]
               else:
-                  cmd = ["go", "build", "-o", f"{dist}/{binary}", "./cmd/"]
-              print(f"  Building {binary} from {path}...")
+                  cmd = ["go", "build", "-o", f"{dist}/{out_name}", "./cmd/"]
+              print(f"  Building {out_name} from {path}...")
               result = subprocess.run(cmd, capture_output=True, text=True, cwd=path)
               if result.returncode != 0:
-                  print(f"  FAILED: {binary}", file=sys.stderr)
+                  print(f"  FAILED: {out_name}", file=sys.stderr)
                   print(result.stderr, file=sys.stderr)
                   sys.exit(1)
-              print(f"  OK: {binary}")
+              print(f"  OK: {out_name}")
           PYEOF
 
       - name: Package tarball
@@ -123,9 +129,11 @@ jobs:
         run: |
           cd dist
           BINARIES=$(python3 -c "
-          import json
+          import json, os
           lock = json.load(open('../orchestra.lock'))
-          bins = [p['binary'] for p in lock['packages'] if p.get('binary') and p['type'] != 'proto' and 'engine-rag' not in p.get('path','')]
+          goos = '${{ matrix.goos }}'
+          ext = '.exe' if goos == 'windows' else ''
+          bins = [p['binary'] + ext for p in lock['packages'] if p.get('binary') and p['type'] != 'proto' and 'engine-rag' not in p.get('path','')]
           print(' '.join(bins))
           ")
           echo "Packaging: ${BINARIES}"

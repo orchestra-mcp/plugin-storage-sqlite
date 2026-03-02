@@ -70,6 +70,9 @@ jobs:
           - goos: linux
             goarch: arm64
             runner: ubuntu-latest
+          - goos: windows
+            goarch: amd64
+            runner: windows-latest
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +100,9 @@ WORKFLOW_EOF
   # This part needs the actual binary name interpolated
   echo "          BINARY_NAME=\"${binary_name}\""
   cat << 'WORKFLOW_EOF'
-          go build -trimpath -ldflags "-s -w" -o "${BINARY_NAME}" ./cmd/
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
+          go build -trimpath -ldflags "-s -w" -o "${BINARY_NAME}${EXT}" ./cmd/
 
       - name: Package tarball
         run: |
@@ -105,8 +110,10 @@ WORKFLOW_EOF
 
   echo "          BINARY_NAME=\"${binary_name}\""
   cat << 'WORKFLOW_EOF'
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
           TARBALL="${BINARY_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz"
-          tar -czf "${TARBALL}" "${BINARY_NAME}"
+          tar -czf "${TARBALL}" "${BINARY_NAME}${EXT}"
           echo "TARBALL=${TARBALL}" >> $GITHUB_ENV
 
       - name: Upload artifact
