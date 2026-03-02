@@ -6,7 +6,10 @@
         "--workspace",
         "/Users/fadymondy/Sites/orchestra-agents"
       ],
-      "command": "/Users/fadymondy/Sites/orchestra-agents/bin/orchestra"
+      "command": "/Users/fadymondy/Sites/orchestra-agents/bin/orchestra",
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-70d89659b8754dc69de6f51dc6d8e6b3"
+      }
     }
   }
 }

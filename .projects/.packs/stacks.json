@@ -1,5 +1,8 @@
 ---
 stacks:
-    - swift
+    - go
+    - rust
+    - react
+    - typescript
 ---
 

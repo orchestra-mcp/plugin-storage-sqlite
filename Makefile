@@ -13,7 +13,7 @@ proto:
 
 # === Build ===
 
-build: build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli build-tools-marketplace build-bridge-claude build-tools-agentops build-tools-sessions build-tools-workspace build-transport-quic-bridge build-bridge-openai build-bridge-gemini build-bridge-ollama build-bridge-firecrawl build-tools-markdown build-tools-docs build-tools-notes build-devtools-git build-agent-orchestrator build-ai-screenshot build-ai-vision build-ai-browser-context build-ai-screen-reader build-services-voice build-services-notifications build-tools-extension-generator build-devtools-file-explorer build-devtools-terminal build-devtools-ssh build-devtools-services build-devtools-docker build-devtools-debugger build-devtools-test-runner build-devtools-log-viewer build-devtools-database build-devtools-devops build-integration-figma build-devtools-components
+build: build-orchestrator build-storage-markdown build-tools-features build-transport-stdio build-cli build-tools-marketplace build-bridge-claude build-tools-agentops build-tools-sessions build-tools-workspace build-transport-quic-bridge build-bridge-openai build-bridge-gemini build-bridge-ollama build-bridge-firecrawl build-tools-markdown build-tools-docs build-tools-notes build-devtools-git build-agent-orchestrator build-ai-screenshot build-ai-vision build-ai-browser-context build-ai-screen-reader build-services-voice build-services-notifications build-tools-extension-generator build-devtools-file-explorer build-devtools-terminal build-devtools-ssh build-devtools-services build-devtools-docker build-devtools-debugger build-devtools-test-runner build-devtools-log-viewer build-devtools-database build-devtools-devops build-integration-figma build-devtools-components build-sync-cloud
 
 build-all: build build-web build-engine-rag
 
@@ -293,6 +293,10 @@ build-devtools-components:
 	@mkdir -p $(BIN_DIR)
 	cd libs/plugin-devtools-components && go build -o $(BIN_DIR)/devtools-components ./cmd/
 
+build-sync-cloud:
+	@mkdir -p $(BIN_DIR)
+	cd libs/plugin-sync-cloud && go build -o $(BIN_DIR)/sync-cloud ./cmd/
+
 # === Swift Universal App ===
 
 SWIFT_DIR        := apps/swift
@@ -340,30 +344,8 @@ run-swift: build-swift ## Build and launch Orchestra.app on macOS
 test-swift: ## Run Swift package unit tests (SPM)
 	cd $(SWIFT_DIR) && swift test
 
-dev-swift: ## Watch Swift sources and auto-rebuild + relaunch on changes (requires fswatch)
-	@which fswatch > /dev/null 2>&1 || { echo "Installing fswatch..."; brew install fswatch; }
-	@echo "Watching $(SWIFT_DIR) for changes (Ctrl+C to stop)..."
-	@echo "Initial build..."
-	@$(MAKE) build-swift && $(MAKE) run-swift || true
-	@fswatch -o $(SWIFT_DIR) \
-	  --exclude ".*\.xcodeproj" \
-	  --exclude ".*\.build" \
-	  --exclude ".*DerivedData" \
-	  --exclude ".*\.resolved" \
-	  | xargs -n1 -I{} sh -c ' \
-	    echo "\n[dev-swift] Change detected — rebuilding..."; \
-	    xcodebuild \
-	      -project $(SWIFT_XCPROJ) \
-	      -scheme $(SWIFT_SCHEME_MAC) \
-	      -configuration $(SWIFT_CONFIG) \
-	      -destination "platform=macOS" \
-	      build -quiet 2>&1 | tail -5 && \
-	    APP=$$(find ~/Library/Developer/Xcode/DerivedData/Orchestra-*/Build/Products/Debug \
-	      -name "Orchestra.app" -not -path "*/Index.noindex/*" 2>/dev/null | head -1); \
-	    pkill -x Orchestra 2>/dev/null; sleep 0.3; \
-	    open "$$APP" && echo "[dev-swift] Relaunched Orchestra.app" \
-	    || echo "[dev-swift] Build failed — fix errors and save again" \
-	  '
+dev-swift: ## Watch Swift sources and auto-rebuild + relaunch on changes
+	@bash scripts/dev-swift.sh
 
 clean-swift: ## Remove Swift DerivedData for Orchestra
 	rm -rf ~/Library/Developer/Xcode/DerivedData/Orchestra-*
