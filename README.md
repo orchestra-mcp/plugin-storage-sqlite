@@ -1,17 +1,22 @@
 # Orchestra Framework
 
-An AI-agentic IDE framework built on a plugin host architecture. Every capability is a plugin — storage, tools, transport, AI — communicating over QUIC with mTLS and Protobuf messages.
+An AI-agentic IDE framework with 290 MCP tools across 36 plugins. Single-process in-process architecture — 4 core plugins bundled, 32 optional plugins installable separately.
 
 ## Install
 
 ```bash
-# macOS / Linux — one-line install
+# macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/orchestra-mcp/framework/master/scripts/install.sh | sh
+
+# Windows (Git Bash)
+curl -fsSL --ssl-revoke-best-effort https://raw.githubusercontent.com/orchestra-mcp/framework/master/scripts/install.sh | sh
 
 # From source
 git clone https://github.com/orchestra-mcp/framework.git
 cd framework && make install
 ```
+
+**Supported platforms**: macOS (amd64, arm64), Linux (amd64, arm64), Windows (amd64 via Git Bash)
 
 ## Quick Start
 
@@ -20,10 +25,10 @@ cd framework && make install
 cd your-project
 orchestra init
 
-# 2. That's it — your AI IDE now has 49 tools + 5 prompts
+# 2. That's it — your AI IDE now has 290 tools + 5 prompts
 ```
 
-`orchestra init` detects your IDE and writes the correct MCP config. Supported IDEs:
+`orchestra init` detects your IDE and writes the correct MCP config:
 
 | IDE | Config File |
 |-----|-------------|
@@ -51,72 +56,85 @@ orchestra init --all
 Agent (Claude, GPT, Gemini, etc.)
   │ JSON-RPC (stdin/stdout)
   ▼
-transport.stdio
-  │ QUIC + Protobuf
-  ▼
-orchestrator ──────────────────┐
-  │ QUIC + Protobuf            │ QUIC + Protobuf
-  ▼                            ▼
-tools.features (34 tools)    storage.markdown (disk)
-  │ QUIC + Protobuf
-  ▼
-tools.marketplace (15 tools, 5 prompts)
+orchestra serve (single process)
+  ├── storage.markdown        (in-process, disk storage)
+  ├── tools.features          (in-process, 34 workflow tools)
+  ├── tools.marketplace       (in-process, 15 tools + 5 prompts)
+  ├── transport.stdio         (in-process, JSON-RPC bridge)
+  │
+  ├── TCP server :50101       (for desktop apps — Swift, Windows, Linux)
+  │
+  └── External plugins        (QUIC + mTLS, optional)
+      ├── bridge.claude       (5 tools — AI provider)
+      ├── bridge.openai       (5 tools — AI provider)
+      ├── bridge.gemini       (5 tools — AI provider)
+      ├── agent.orchestrator  (20 tools — multi-agent)
+      ├── devtools.*          (80+ tools — git, docker, ssh, terminal, etc.)
+      └── 27 more plugins...
 ```
 
-**Star topology** — the orchestrator is the only router. Plugins never talk directly to each other. Any language that speaks QUIC + Protobuf can be a plugin.
+**Single-process** — 4 core plugins run in-process via direct Go function calls. Optional plugins connect over QUIC with mTLS and Protobuf framing.
 
 ## CLI Commands
 
 ```bash
 orchestra init                          # Initialize MCP configs for your IDE(s)
-orchestra serve                         # Start the MCP stdio server
+orchestra serve                         # Start the MCP server
 orchestra version                       # Print version info
-orchestra pack install <repo>[@ver]     # Install a pack of skills/agents/hooks
+orchestra update                        # Self-update to latest release
+orchestra plugin install <name>         # Install an optional plugin
+orchestra plugin remove <name>          # Remove a plugin
+orchestra plugin list                   # List installed plugins
+orchestra plugin search <query>         # Search available plugins
+orchestra pack install <repo>[@ver]     # Install a content pack (skills/agents/hooks)
 orchestra pack remove <name>            # Remove an installed pack
 orchestra pack list                     # List installed packs
 orchestra pack search <query>           # Search available packs
 orchestra pack recommend                # Recommend packs for your project
 ```
 
-### `orchestra init`
+## Plugins (36 total)
 
+### Core Plugins (bundled, always available)
+
+| Plugin | Tools | Description |
+|--------|-------|-------------|
+| `storage.markdown` | — | File storage with YAML frontmatter + Markdown body |
+| `tools.features` | 34 | Feature-driven workflow (11-state lifecycle) |
+| `tools.marketplace` | 15+5p | Pack management and marketplace |
+| `transport.stdio` | — | MCP JSON-RPC bridge (stdin/stdout) |
+
+### Optional Plugins (install separately)
+
+| Category | Plugins | Tools |
+|----------|---------|-------|
+| **AI Bridges** | bridge.claude, bridge.openai, bridge.gemini, bridge.ollama, bridge.firecrawl | 25 |
+| **Agent** | agent.orchestrator | 20 |
+| **DevTools** | devtools.git, devtools.docker, devtools.terminal, devtools.ssh, devtools.file-explorer, devtools.database, devtools.debugger, devtools.test-runner, devtools.log-viewer, devtools.services, devtools.devops, devtools.components | 110+ |
+| **AI Awareness** | ai.screenshot, ai.vision, ai.browser-context, ai.screen-reader | 25 |
+| **Tools** | tools.agentops, tools.sessions, tools.workspace, tools.notes, tools.docs, tools.markdown, tools.extension-generator | 56 |
+| **Services** | services.voice, services.notifications | 16 |
+| **Integration** | integration.figma | 6 |
+| **Transport** | transport.quic-bridge, transport.webtransport | — |
+
+```bash
+# Install a plugin
+orchestra plugin install bridge-claude
+
+# Search plugins
+orchestra plugin search "ai"
 ```
---workspace=DIR   Project directory (default: current directory)
---ide=NAME        Target IDE: claude, cursor, vscode, cline, windsurf, codex, gemini, zed, continue
---all             Generate configs for all supported IDEs
-```
 
-### `orchestra serve`
+## Content Packs
 
-```
---workspace=DIR   Project workspace directory (default: current directory)
---certs-dir=DIR   mTLS certificates directory (default: ~/.orchestra/certs)
---log=FILE        Log file path (default: .orchestra-mcp.log)
-```
-
-## Binaries
-
-| Binary | Description |
-|--------|-------------|
-| `orchestra` | CLI — init, serve, version, pack management |
-| `orchestrator` | Central hub — starts plugins, routes QUIC messages |
-| `storage-markdown` | File storage with YAML frontmatter metadata + Markdown body |
-| `tools-features` | 34 feature-driven workflow tools |
-| `transport-stdio` | MCP JSON-RPC bridge (stdin/stdout to QUIC) |
-| `tools-marketplace` | 15 pack management tools + 5 prompts |
-
-All 6 binaries are co-located in the same directory. `orchestra serve` finds the other 5 as siblings.
-
-## Packs
-
-Packs are installable bundles of skills (slash commands), agents (specialized sub-agents), and hooks (shell scripts). 17 official packs cover common stacks:
+Packs are installable bundles of skills (slash commands), agents (specialized sub-agents), and hooks (shell scripts). 17 official packs:
 
 | Pack | Stacks | Contents |
 |------|--------|----------|
 | `pack-essentials` | all | project-manager, qa-testing, docs, scrum-master, devops |
 | `pack-go-backend` | go | go-backend skill, go-architect + qa-go agents |
 | `pack-rust-engine` | rust | rust-engine skill, rust-engineer + qa-rust agents |
-| `pack-react-frontend` | react, typescript | typescript-react, ui-design, tailwind skills |
+| `pack-react-frontend` | react, ts | typescript-react, ui-design, tailwind skills |
 | `pack-database` | all | database-sync skill, dba + postgres/sqlite/redis agents |
 | `pack-ai` | all | ai-agentic skill, ai-engineer + lancedb agents |
 | `pack-proto` | go, rust | proto-grpc skill, quic-protocol agent |
@@ -132,13 +150,8 @@ Packs are installable bundles of skills (slash commands), agents (specialized su
 | `pack-native-gtk` | c | gtk-plugin agent |
 
 ```bash
-# Install a pack
 orchestra pack install github.com/orchestra-mcp/pack-go-backend
-
-# Auto-detect your stacks and get recommendations
-orchestra pack recommend
-
-# Search for packs
+orchestra pack recommend    # Auto-detect stacks and suggest packs
 orchestra pack search "react"
 ```
 
@@ -166,26 +179,6 @@ backlog → todo → in-progress → ready-for-testing → in-testing →
 | **Reporting** | 3 | `get_progress`, `get_review_queue`, `get_blocked_features` |
 | **Metadata** | 8 | `add_labels`, `remove_labels`, `assign_feature`, `unassign_feature`, `set_estimate`, `save_note`, `list_notes` |
 
-All tools return formatted Markdown (tables, headings, bold text).
-
-## Dependency Management
-
-Orchestra uses `orchestra.json` and `orchestra.lock` (similar to `composer.json`/`composer.lock`) to manage packages:
-
-```bash
-# orchestra.json — declares required packages with version constraints
-{
-    "require": {
-        "orchestra-mcp/sdk-go": "^0.1.0",
-        "orchestra-mcp/plugin-tools-features": "^0.1.0"
-    }
-}
-
-# orchestra.lock — pins exact resolved versions (committed to repo)
-```
-
-Each plugin also has its own `orchestra.json` declaring its identity and dependencies. CI workflows, sync scripts, and release scripts all read from `orchestra.lock` as the single source of truth.
-
 ## Project Structure
 
 ```
@@ -195,41 +188,43 @@ framework/
 │   ├── gen-go/                        #   Generated Go code from proto
 │   ├── sdk-go/                        #   Plugin SDK (QUIC, mTLS, framing, helpers)
 │   ├── orchestrator/                  #   Central hub (config, loader, router, server)
-│   ├── plugin-storage-markdown/       #   Markdown storage with YAML frontmatter
-│   ├── plugin-tools-features/         #   34 feature workflow tools
-│   ├── plugin-tools-marketplace/      #   15 pack management tools + 5 prompts
-│   ├── plugin-transport-stdio/        #   MCP JSON-RPC stdin/stdout bridge
-│   └── cli/                           #   CLI binary (init, serve, version, pack)
-├── packs/                             # 17 installable packs (skills, agents, hooks)
+│   ├── cli/                           #   CLI binary (init, serve, version, pack, plugin)
+│   ├── plugin-storage-markdown/       #   Core: Markdown storage
+│   ├── plugin-tools-features/         #   Core: 34 feature workflow tools
+│   ├── plugin-tools-marketplace/      #   Core: pack management + marketplace
+│   ├── plugin-transport-stdio/        #   Core: MCP JSON-RPC bridge
+│   ├── plugin-bridge-claude/          #   Optional: Claude AI provider
+│   ├── plugin-bridge-openai/          #   Optional: OpenAI provider
+│   ├── plugin-bridge-gemini/          #   Optional: Gemini provider
+│   ├── plugin-agent-orchestrator/     #   Optional: Multi-agent orchestration
+│   ├── plugin-devtools-*/             #   Optional: 12 devtools plugins
+│   ├── plugin-ai-*/                   #   Optional: 4 AI awareness plugins
+│   └── ... (36 plugins total)
+├── packs/                             # 17 installable content packs
 ├── scripts/
-│   ├── install.sh                     # curl | sh installer
-│   ├── new-plugin.sh                  # Plugin generator (tools/storage/transport)
+│   ├── install.sh                     # curl | sh installer (macOS/Linux/Windows)
+│   ├── new-plugin.sh                  # Plugin generator
 │   ├── sync-repos.sh                  # Push libs/ to individual GitHub repos
-│   ├── release.sh                     # Sync + tag + create GitHub releases
+│   ├── release.sh                     # Tag + create GitHub releases
 │   ├── ship.sh                        # Full ship pipeline (build, test, sync, release)
-│   ├── orchestra-fmt.sh               # Format & validate orchestra.json files
 │   └── test-e2e.sh                    # End-to-end integration test
 ├── .github/workflows/
 │   ├── ci.yml                         # CI: build + test + vet on push/PR
-│   └── release.yml                    # Release: cross-compile on tag push
-├── docs/
-│   ├── artifacts/                     # 17 design artifacts
-│   └── implementation/                # Step-by-step build docs (01-07)
-├── orchestra.json                     # Package manifest (like composer.json)
-├── orchestra.lock                     # Pinned versions (like composer.lock)
-├── plugins.yaml                       # Default plugin runtime configuration
-├── go.work                            # Go workspace (7 modules)
-└── Makefile                           # Build, test, install, release, clean
+│   └── release.yml                    # Release: 5-platform cross-compile on tag push
+├── orchestra.json                     # Package manifest
+├── orchestra.lock                     # Pinned versions (44 packages)
+├── go.work                            # Go workspace
+└── Makefile                           # Build, test, install, release
 ```
 
 ## Makefile Targets
 
 ```bash
-make build              # Build all 6 binaries to bin/
+make build              # Build all binaries to bin/
 make test               # Run all unit tests
 make test-e2e           # Build + run end-to-end integration test
-make install            # Install all 6 binaries to /usr/local/bin
-make release            # Cross-compile for darwin/linux × amd64/arm64
+make install            # Install binaries to /usr/local/bin
+make release            # Cross-compile for darwin/linux × amd64/arm64 + windows/amd64
 make clean              # Remove build artifacts and certs
 make proto              # Lint + generate proto code
 ```
@@ -270,57 +265,61 @@ func main() {
 ### Scaffold a New Plugin
 
 ```bash
-./scripts/new-plugin.sh my-plugin tools       # Tools plugin (provides MCP tools)
-./scripts/new-plugin.sh my-plugin storage     # Storage plugin (provides data backend)
-./scripts/new-plugin.sh my-plugin transport   # Transport plugin (bridges protocols)
+./scripts/new-plugin.sh my-plugin tools       # Tools plugin
+./scripts/new-plugin.sh my-plugin storage     # Storage plugin
+./scripts/new-plugin.sh my-plugin transport   # Transport plugin
 ```
-
-The generator creates all files (`cmd/main.go`, `internal/`, `go.mod`, `orchestra.json`, docs, CI), updates `go.work`, `Makefile`, `orchestra.json`, and `orchestra.lock` automatically.
 
 ## Scripts
 
 ```bash
+# Ship a release (build, test, sync, tag, release)
+./scripts/ship.sh v1.0.0
+./scripts/ship.sh v1.0.0 --skip-pr --message "Release v1.0.0"
+./scripts/ship.sh v1.0.0 --dry-run
+
 # Sync local libs/ to individual GitHub repos
-./scripts/sync-repos.sh                     # Sync all 8 packages
+./scripts/sync-repos.sh                     # Sync all 44 packages
 ./scripts/sync-repos.sh sdk-go cli          # Sync specific packages
-./scripts/sync-repos.sh --dry-run           # Preview without pushing
 
 # Release all packages
-./scripts/release.sh v0.2.0                 # Sync + tag + release all
-./scripts/release.sh v0.2.0 --force         # Re-tag existing version
-./scripts/release.sh v0.2.0 --dry-run       # Preview
-
-# Format & validate orchestra.json files
-./scripts/orchestra-fmt.sh                  # Format all
-./scripts/orchestra-fmt.sh --check          # CI check (exit 1 if unformatted)
-./scripts/orchestra-fmt.sh --validate       # Validate cross-references
+./scripts/release.sh v1.0.0                 # Tag + release all 44 repos
+./scripts/release.sh v1.0.0 --force         # Re-tag existing version
 ```
 
 ## Protocol
 
-All communication uses length-delimited Protobuf over QUIC with mTLS:
+All inter-plugin communication uses length-delimited Protobuf over QUIC with mTLS:
 
 ```
 [4 bytes big-endian uint32 length][N bytes Protobuf PluginRequest/Response]
 ```
 
 - **mTLS**: Auto-generated ed25519 CA + per-plugin certificates at `~/.orchestra/certs/`
-- **Plugin startup**: Binary prints `READY <addr>` to stderr, orchestrator connects and sends Register + Boot
+- **In-process**: Core plugins bypass QUIC entirely — direct Go function calls
+- **TCP**: Desktop apps (Swift, Windows, Linux) connect via length-delimited Protobuf on port 50101
 - **Storage format**: YAML frontmatter (`---` delimiters) + Markdown body
 
 ## Module Paths
 
-All packages are published as independent Go modules:
+All 44 packages are published as independent Go modules under `github.com/orchestra-mcp/`:
 
 ```
-github.com/orchestra-mcp/proto                     # Protobuf definitions
-github.com/orchestra-mcp/gen-go                    # Generated protobuf code
-github.com/orchestra-mcp/sdk-go                    # Plugin SDK
-github.com/orchestra-mcp/orchestrator              # Central hub
-github.com/orchestra-mcp/plugin-storage-markdown   # Storage plugin
-github.com/orchestra-mcp/plugin-tools-features     # Tools plugin
-github.com/orchestra-mcp/plugin-transport-stdio    # Transport plugin
-github.com/orchestra-mcp/cli                       # CLI binary
+proto, gen-go, sdk-go, orchestrator, cli,
+plugin-storage-markdown, plugin-tools-features, plugin-tools-marketplace,
+plugin-transport-stdio, plugin-bridge-claude, plugin-bridge-openai,
+plugin-bridge-gemini, plugin-bridge-ollama, plugin-bridge-firecrawl,
+plugin-agent-orchestrator, plugin-tools-agentops, plugin-tools-sessions,
+plugin-tools-workspace, plugin-tools-notes, plugin-tools-docs,
+plugin-tools-markdown, plugin-tools-extension-generator,
+plugin-devtools-git, plugin-devtools-docker, plugin-devtools-terminal,
+plugin-devtools-ssh, plugin-devtools-file-explorer, plugin-devtools-database,
+plugin-devtools-debugger, plugin-devtools-test-runner, plugin-devtools-log-viewer,
+plugin-devtools-services, plugin-devtools-devops, plugin-devtools-components,
+plugin-ai-screenshot, plugin-ai-vision, plugin-ai-browser-context,
+plugin-ai-screen-reader, plugin-services-voice, plugin-services-notifications,
+plugin-integration-figma, plugin-transport-quic-bridge,
+plugin-transport-webtransport, plugin-engine-rag
 ```
 
 ## Contributing
