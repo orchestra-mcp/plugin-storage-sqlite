@@ -1,0 +1,25 @@
+{
+    "name": "orchestra-mcp/plugin-storage-sqlite",
+    "description": "SQLite storage plugin with typed tables, CAS versioning, and markdown dual-write.",
+    "type": "plugin",
+    "license": "MIT",
+    "homepage": "https://orchestra-mcp.dev",
+    "support": {
+        "issues": "https://github.com/orchestra-mcp/plugin-storage-sqlite/issues",
+        "source": "https://github.com/orchestra-mcp/plugin-storage-sqlite"
+    },
+    "require": {
+        "orchestra-mcp/gen-go": "^1.0.0",
+        "orchestra-mcp/sdk-go": "^1.0.0"
+    },
+    "bin": "storage-sqlite",
+    "extra": {
+        "plugin-id": "storage.sqlite",
+        "provides": [
+            "storage"
+        ],
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
