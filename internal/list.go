@@ -18,6 +18,12 @@ func (s *StoragePlugin) List(_ context.Context, req *pluginv1.StorageListRequest
 		prefix = "."
 	}
 
+	// Root prefix with project.json pattern → list all projects.
+	cleanPrefix := strings.Trim(filepath.ToSlash(filepath.Clean(prefix)), "/")
+	if cleanPrefix == "." && req.Pattern == "project.json" {
+		return s.listAllProjects()
+	}
+
 	entity, projectID := isListPrefix(prefix)
 
 	switch entity {
@@ -44,6 +50,16 @@ func (s *StoragePlugin) List(_ context.Context, req *pluginv1.StorageListRequest
 	default:
 		return s.listKV(prefix, req.Pattern)
 	}
+}
+
+func (s *StoragePlugin) listAllProjects() (*pluginv1.StorageListResponse, error) {
+	rows, err := s.db.Query(`SELECT slug, '' AS project_id, version, updated_at FROM projects`)
+	if err != nil {
+		return nil, fmt.Errorf("list projects: %w", err)
+	}
+	return scanEntries(rows, func(slug, _ string) string {
+		return filepath.Join(slug, "project.json")
+	})
 }
 
 func (s *StoragePlugin) listFeatures(projectID string) (*pluginv1.StorageListResponse, error) {
@@ -97,11 +113,21 @@ func (s *StoragePlugin) listAssignmentRules(projectID string) (*pluginv1.Storage
 }
 
 func (s *StoragePlugin) listNotes(projectID string) (*pluginv1.StorageListResponse, error) {
-	rows, err := s.db.Query(`SELECT id, project_id, version, updated_at FROM notes WHERE project_id = ?`, projectID)
+	// .global notes may be stored with project_id="" or ".global" — match both.
+	var rows *sql.Rows
+	var err error
+	if projectID == ".global" {
+		rows, err = s.db.Query(`SELECT id, project_id, version, updated_at FROM notes WHERE project_id IN ('', '.global') AND deleted = 0`)
+	} else {
+		rows, err = s.db.Query(`SELECT id, project_id, version, updated_at FROM notes WHERE project_id = ? AND deleted = 0`, projectID)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("list notes: %w", err)
 	}
 	return scanEntries(rows, func(id, pid string) string {
+		if pid == "" {
+			pid = ".global"
+		}
 		return filepath.Join(pid, "notes", id+".md")
 	})
 }
