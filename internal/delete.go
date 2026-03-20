@@ -24,6 +24,8 @@ func (s *StoragePlugin) Delete(_ context.Context, req *pluginv1.StorageDeleteReq
 		table, pkCol, pkVal = "plans", "id", route.EntityID
 	case entityRequest:
 		table, pkCol, pkVal = "requests", "id", route.EntityID
+	case entityDelegation:
+		table, pkCol, pkVal = "delegations", "id", route.EntityID
 	case entityAssignmentRule:
 		table, pkCol, pkVal = "assignment_rules", "id", route.EntityID
 	case entityNote:
@@ -46,15 +48,23 @@ func (s *StoragePlugin) Delete(_ context.Context, req *pluginv1.StorageDeleteReq
 		if n == 0 {
 			return &pluginv1.StorageDeleteResponse{Success: false}, fmt.Errorf("turn not found: %s/%s", route.EntityID, route.SubID)
 		}
-		go s.deleteMarkdown(req.Path)
+		s.recordChange(route.Table, route.EntityID, "delete", 0)
+
 		return &pluginv1.StorageDeleteResponse{Success: true}, nil
+	case entityDoc:
+		table, pkCol, pkVal = "docs", "id", route.EntityID
+	case entitySkill:
+		table, pkCol, pkVal = "skills", "id", route.EntityID
+	case entityAgent:
+		table, pkCol, pkVal = "agents", "id", route.EntityID
 	case entityPack:
 		// Delete all packs (registry reset).
 		_, err := s.db.Exec(`DELETE FROM packs`)
 		if err != nil {
 			return &pluginv1.StorageDeleteResponse{Success: false}, fmt.Errorf("delete packs: %w", err)
 		}
-		go s.deleteMarkdown(req.Path)
+		s.recordChange(route.Table, "registry", "delete", 0)
+
 		return &pluginv1.StorageDeleteResponse{Success: true}, nil
 	default:
 		// KV fallback.
@@ -66,7 +76,7 @@ func (s *StoragePlugin) Delete(_ context.Context, req *pluginv1.StorageDeleteReq
 		if n == 0 {
 			return &pluginv1.StorageDeleteResponse{Success: false}, fmt.Errorf("not found: %s", req.Path)
 		}
-		go s.deleteMarkdown(req.Path)
+
 		return &pluginv1.StorageDeleteResponse{Success: true}, nil
 	}
 
@@ -80,6 +90,6 @@ func (s *StoragePlugin) Delete(_ context.Context, req *pluginv1.StorageDeleteReq
 		return &pluginv1.StorageDeleteResponse{Success: false}, fmt.Errorf("not found: %s", req.Path)
 	}
 
-	go s.deleteMarkdown(req.Path)
+	s.recordChange(table, pkVal, "delete", 0)
 	return &pluginv1.StorageDeleteResponse{Success: true}, nil
 }

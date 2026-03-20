@@ -28,6 +28,8 @@ func (s *StoragePlugin) Write(ctx context.Context, req *pluginv1.StorageWriteReq
 		resp, err = s.writePlan(route, req)
 	case entityRequest:
 		resp, err = s.writeRequest(route, req)
+	case entityDelegation:
+		resp, err = s.writeDelegation(route, req)
 	case entityAssignmentRule:
 		resp, err = s.writeAssignmentRule(route, req)
 	case entityNote:
@@ -44,6 +46,12 @@ func (s *StoragePlugin) Write(ctx context.Context, req *pluginv1.StorageWriteReq
 		resp, err = s.writePacks(route, req)
 	case entityStack:
 		resp, err = s.writeStacks(route, req)
+	case entityDoc:
+		resp, err = s.writeDoc(route, req)
+	case entitySkill:
+		resp, err = s.writeSkill(route, req)
+	case entityAgent:
+		resp, err = s.writeAgent(route, req)
 	default:
 		resp, err = s.writeKV(route, req)
 	}
@@ -52,9 +60,9 @@ func (s *StoragePlugin) Write(ctx context.Context, req *pluginv1.StorageWriteReq
 		return &pluginv1.StorageWriteResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	// Dual-write: async markdown export for git visibility.
+	// Record change for sync.
 	if resp.Success {
-		go s.exportMarkdown(req.Path, req.Metadata, req.Content)
+		s.recordChange(route.Table, route.EntityID, "upsert", resp.NewVersion)
 	}
 
 	return resp, nil
@@ -169,6 +177,36 @@ func (s *StoragePlugin) writeRequest(r routedPath, req *pluginv1.StorageWriteReq
 		strDef(m, "created_at", now), now)
 	if err != nil {
 		return nil, fmt.Errorf("write request: %w", err)
+	}
+
+	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil
+}
+
+func (s *StoragePlugin) writeDelegation(r routedPath, req *pluginv1.StorageWriteRequest) (*pluginv1.StorageWriteResponse, error) {
+	m := metaMap(req.Metadata)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	newVer, err := s.casCheck("delegations", "id", r.EntityID, req.ExpectedVersion)
+	if err != nil {
+		return &pluginv1.StorageWriteResponse{Success: false, Error: err.Error()}, nil
+	}
+
+	_, err = s.db.Exec(`INSERT INTO delegations (id, project_id, feature_id, from_person, to_person, question,
+		context, response, status, responded_at, body, version, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			feature_id=excluded.feature_id, from_person=excluded.from_person,
+			to_person=excluded.to_person, question=excluded.question,
+			context=excluded.context, response=excluded.response,
+			status=excluded.status, responded_at=excluded.responded_at,
+			body=excluded.body, version=excluded.version, updated_at=excluded.updated_at`,
+		r.EntityID, str(m, "project_id"), str(m, "feature_id"), str(m, "from_person"),
+		str(m, "to_person"), str(m, "question"),
+		str(m, "context"), str(m, "response"),
+		strDef(m, "status", "pending"), str(m, "responded_at"),
+		string(req.Content), newVer, strDef(m, "created_at", now), now)
+	if err != nil {
+		return nil, fmt.Errorf("write delegation: %w", err)
 	}
 
 	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil
@@ -410,6 +448,103 @@ func (s *StoragePlugin) writeKV(r routedPath, req *pluginv1.StorageWriteRequest)
 		r.Raw, req.Content, metaJSON, newVer, now, now)
 	if err != nil {
 		return nil, fmt.Errorf("write kv: %w", err)
+	}
+
+	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil
+}
+
+func (s *StoragePlugin) writeDoc(r routedPath, req *pluginv1.StorageWriteRequest) (*pluginv1.StorageWriteResponse, error) {
+	m := metaMap(req.Metadata)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	newVer, err := s.casCheck("docs", "id", r.EntityID, req.ExpectedVersion)
+	if err != nil {
+		return &pluginv1.StorageWriteResponse{Success: false, Error: err.Error()}, nil
+	}
+
+	published := 0
+	if boolVal(m, "published") {
+		published = 1
+	}
+
+	_, err = s.db.Exec(`INSERT INTO docs (id, project_id, title, slug, body, parent_id, position,
+		published, published_at, tags, version, synced_at, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			title=excluded.title, slug=excluded.slug, body=excluded.body,
+			parent_id=excluded.parent_id, position=excluded.position,
+			published=excluded.published, published_at=excluded.published_at,
+			tags=excluded.tags, version=excluded.version,
+			synced_at=excluded.synced_at, updated_at=excluded.updated_at`,
+		r.EntityID, str(m, "project_id"), str(m, "title"), str(m, "slug"),
+		string(req.Content), str(m, "parent_id"), intVal(m, "position"),
+		published, str(m, "published_at"), jsonArr(m, "tags"),
+		newVer, str(m, "synced_at"), strDef(m, "created_at", now), now)
+	if err != nil {
+		return nil, fmt.Errorf("write doc: %w", err)
+	}
+
+	s.ensureProject(r.ProjectID)
+	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil
+}
+
+func (s *StoragePlugin) writeSkill(r routedPath, req *pluginv1.StorageWriteRequest) (*pluginv1.StorageWriteResponse, error) {
+	m := metaMap(req.Metadata)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	newVer, err := s.casCheck("skills", "id", r.EntityID, req.ExpectedVersion)
+	if err != nil {
+		return &pluginv1.StorageWriteResponse{Success: false, Error: err.Error()}, nil
+	}
+
+	_, err = s.db.Exec(`INSERT INTO skills (id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, stacks, version, synced_at, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			team_id=excluded.team_id, name=excluded.name, slug=excluded.slug,
+			description=excluded.description, content=excluded.content,
+			scope=excluded.scope, public_url=excluded.public_url,
+			icon=excluded.icon, color=excluded.color, stacks=excluded.stacks,
+			version=excluded.version, synced_at=excluded.synced_at,
+			updated_at=excluded.updated_at`,
+		r.EntityID, str(m, "team_id"), str(m, "name"), str(m, "slug"),
+		str(m, "description"), string(req.Content),
+		strDef(m, "scope", "personal"), str(m, "public_url"),
+		str(m, "icon"), str(m, "color"), jsonArr(m, "stacks"),
+		newVer, str(m, "synced_at"), strDef(m, "created_at", now), now)
+	if err != nil {
+		return nil, fmt.Errorf("write skill: %w", err)
+	}
+
+	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil
+}
+
+func (s *StoragePlugin) writeAgent(r routedPath, req *pluginv1.StorageWriteRequest) (*pluginv1.StorageWriteResponse, error) {
+	m := metaMap(req.Metadata)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	newVer, err := s.casCheck("agents", "id", r.EntityID, req.ExpectedVersion)
+	if err != nil {
+		return &pluginv1.StorageWriteResponse{Success: false, Error: err.Error()}, nil
+	}
+
+	_, err = s.db.Exec(`INSERT INTO agents (id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, version, synced_at, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			team_id=excluded.team_id, name=excluded.name, slug=excluded.slug,
+			description=excluded.description, content=excluded.content,
+			scope=excluded.scope, public_url=excluded.public_url,
+			icon=excluded.icon, color=excluded.color,
+			version=excluded.version, synced_at=excluded.synced_at,
+			updated_at=excluded.updated_at`,
+		r.EntityID, str(m, "team_id"), str(m, "name"), str(m, "slug"),
+		str(m, "description"), string(req.Content),
+		strDef(m, "scope", "personal"), str(m, "public_url"),
+		str(m, "icon"), str(m, "color"),
+		newVer, str(m, "synced_at"), strDef(m, "created_at", now), now)
+	if err != nil {
+		return nil, fmt.Errorf("write agent: %w", err)
 	}
 
 	return &pluginv1.StorageWriteResponse{Success: true, NewVersion: newVer}, nil

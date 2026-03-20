@@ -81,6 +81,26 @@ CREATE TABLE IF NOT EXISTS requests (
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS delegations (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    feature_id TEXT NOT NULL,
+    from_person TEXT DEFAULT '',
+    to_person TEXT NOT NULL,
+    question TEXT NOT NULL,
+    context TEXT DEFAULT '',
+    response TEXT DEFAULT '',
+    status TEXT DEFAULT 'pending',
+    responded_at TEXT DEFAULT '',
+    body TEXT DEFAULT '',
+    version INTEGER DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_delegations_project ON delegations(project_id);
+CREATE INDEX IF NOT EXISTS idx_delegations_feature ON delegations(project_id, feature_id);
+CREATE INDEX IF NOT EXISTS idx_delegations_status ON delegations(project_id, status);
+
 CREATE TABLE IF NOT EXISTS assignment_rules (
     id TEXT PRIMARY KEY,
     project_id TEXT NOT NULL,
@@ -163,15 +183,7 @@ CREATE TABLE IF NOT EXISTS stacks (
     version INTEGER DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS hook_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    event_type TEXT NOT NULL,
-    payload TEXT DEFAULT '{}',
-    created_at TEXT DEFAULT (datetime('now'))
-);
-
--- Generic key-value store for data that doesn't fit a dedicated table
--- (e.g., .events/hook-events.toon or any custom storage paths).
+-- Generic key-value store for data that doesn't fit a dedicated table.
 CREATE TABLE IF NOT EXISTS kv_store (
     path TEXT PRIMARY KEY,
     content BLOB,
@@ -179,6 +191,92 @@ CREATE TABLE IF NOT EXISTS kv_store (
     version INTEGER DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS docs (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    body TEXT DEFAULT '',
+    parent_id TEXT DEFAULT '',
+    position INTEGER DEFAULT 0,
+    published INTEGER DEFAULT 0,
+    published_at TEXT DEFAULT '',
+    tags TEXT DEFAULT '[]',
+    version INTEGER DEFAULT 1,
+    synced_at TEXT DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_docs_project ON docs(project_id);
+CREATE INDEX IF NOT EXISTS idx_docs_slug ON docs(project_id, slug);
+
+CREATE TABLE IF NOT EXISTS skills (
+    id TEXT PRIMARY KEY,
+    team_id TEXT DEFAULT '',
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    content TEXT DEFAULT '',
+    scope TEXT DEFAULT 'personal',
+    public_url TEXT DEFAULT '',
+    icon TEXT DEFAULT '',
+    color TEXT DEFAULT '',
+    stacks TEXT DEFAULT '[]',
+    version INTEGER DEFAULT 1,
+    synced_at TEXT DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_skills_slug ON skills(slug);
+
+CREATE TABLE IF NOT EXISTS agents (
+    id TEXT PRIMARY KEY,
+    team_id TEXT DEFAULT '',
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    content TEXT DEFAULT '',
+    scope TEXT DEFAULT 'personal',
+    public_url TEXT DEFAULT '',
+    icon TEXT DEFAULT '',
+    color TEXT DEFAULT '',
+    version INTEGER DEFAULT 1,
+    synced_at TEXT DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_agents_slug ON agents(slug);
+
+CREATE TABLE IF NOT EXISTS project_skills (
+    project_id TEXT NOT NULL,
+    skill_id TEXT NOT NULL,
+    enabled INTEGER DEFAULT 1,
+    PRIMARY KEY (project_id, skill_id)
+);
+
+CREATE TABLE IF NOT EXISTS project_agents (
+    project_id TEXT NOT NULL,
+    agent_id TEXT NOT NULL,
+    enabled INTEGER DEFAULT 1,
+    PRIMARY KEY (project_id, agent_id)
+);
+
+CREATE TABLE IF NOT EXISTS change_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    synced INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_change_log_unsynced ON change_log(synced, timestamp);
+
+CREATE TABLE IF NOT EXISTS sync_state (
+    key TEXT PRIMARY KEY,
+    value TEXT DEFAULT ''
 );
 `
 

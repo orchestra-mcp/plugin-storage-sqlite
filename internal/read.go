@@ -22,6 +22,8 @@ func (s *StoragePlugin) Read(_ context.Context, req *pluginv1.StorageReadRequest
 		return s.readPlan(route)
 	case entityRequest:
 		return s.readRequest(route)
+	case entityDelegation:
+		return s.readDelegation(route)
 	case entityAssignmentRule:
 		return s.readAssignmentRule(route)
 	case entityNote:
@@ -38,8 +40,12 @@ func (s *StoragePlugin) Read(_ context.Context, req *pluginv1.StorageReadRequest
 		return s.readPacks(route)
 	case entityStack:
 		return s.readStacks(route)
-	case entityHookEvent:
-		return s.readKV(route)
+	case entityDoc:
+		return s.readDoc(route)
+	case entitySkill:
+		return s.readSkill(route)
+	case entityAgent:
+		return s.readAgent(route)
 	default:
 		return s.readKV(route)
 	}
@@ -168,6 +174,35 @@ func (s *StoragePlugin) readRequest(r routedPath) (*pluginv1.StorageReadResponse
 		"id": id, "project_id": projectID, "title": title,
 		"description": description, "kind": kind, "status": status,
 		"priority": priority, "version": float64(version),
+		"created_at": createdAt, "updated_at": updatedAt,
+	}
+
+	meta, _ := structpb.NewStruct(m)
+	return &pluginv1.StorageReadResponse{Content: []byte(body), Metadata: meta, Version: version}, nil
+}
+
+func (s *StoragePlugin) readDelegation(r routedPath) (*pluginv1.StorageReadResponse, error) {
+	var (
+		id, projectID, featureID, fromPerson, toPerson, question string
+		ctx, response, status, respondedAt                       string
+		body                                                     string
+		version                                                  int64
+		createdAt, updatedAt                                     string
+	)
+	err := s.db.QueryRow(`SELECT id, project_id, feature_id, from_person, to_person, question,
+		context, response, status, responded_at, body, version, created_at, updated_at
+		FROM delegations WHERE id = ?`, r.EntityID).Scan(
+		&id, &projectID, &featureID, &fromPerson, &toPerson, &question,
+		&ctx, &response, &status, &respondedAt, &body, &version, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("read delegation %s: %w", r.EntityID, err)
+	}
+
+	m := map[string]any{
+		"id": id, "project_id": projectID, "feature_id": featureID,
+		"from_person": fromPerson, "to_person": toPerson, "question": question,
+		"context": ctx, "response": response, "status": status,
+		"responded_at": respondedAt, "version": float64(version),
 		"created_at": createdAt, "updated_at": updatedAt,
 	}
 
@@ -405,6 +440,126 @@ func (s *StoragePlugin) readStacks(_ routedPath) (*pluginv1.StorageReadResponse,
 
 	meta, _ := structpb.NewStruct(m)
 	return &pluginv1.StorageReadResponse{Metadata: meta, Version: version}, nil
+}
+
+func (s *StoragePlugin) readDoc(r routedPath) (*pluginv1.StorageReadResponse, error) {
+	var (
+		id, projectID, title, slug, body     string
+		parentID, publishedAt, tagsJSON      string
+		position, published                  int
+		version                              int64
+		syncedAt, createdAt, updatedAt       string
+	)
+	err := s.db.QueryRow(`SELECT id, project_id, title, slug, body, parent_id, position,
+		published, published_at, tags, version, synced_at, created_at, updated_at
+		FROM docs WHERE id = ?`, r.EntityID).Scan(
+		&id, &projectID, &title, &slug, &body, &parentID, &position,
+		&published, &publishedAt, &tagsJSON, &version, &syncedAt, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("read doc %s: %w", r.EntityID, err)
+	}
+
+	m := map[string]any{
+		"id": id, "project_id": projectID, "title": title, "slug": slug,
+		"position": float64(position), "published": published != 0,
+		"version": float64(version), "created_at": createdAt, "updated_at": updatedAt,
+	}
+	if parentID != "" {
+		m["parent_id"] = parentID
+	}
+	if publishedAt != "" {
+		m["published_at"] = publishedAt
+	}
+	if syncedAt != "" {
+		m["synced_at"] = syncedAt
+	}
+	setJSONArray(m, "tags", tagsJSON)
+
+	meta, _ := structpb.NewStruct(m)
+	return &pluginv1.StorageReadResponse{Content: []byte(body), Metadata: meta, Version: version}, nil
+}
+
+func (s *StoragePlugin) readSkill(r routedPath) (*pluginv1.StorageReadResponse, error) {
+	var (
+		id, teamID, name, slug, description, content string
+		scope, publicURL, icon, color, stacksJSON    string
+		version                                      int64
+		syncedAt, createdAt, updatedAt               string
+	)
+	err := s.db.QueryRow(`SELECT id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, stacks, version, synced_at, created_at, updated_at
+		FROM skills WHERE id = ?`, r.EntityID).Scan(
+		&id, &teamID, &name, &slug, &description, &content,
+		&scope, &publicURL, &icon, &color, &stacksJSON, &version, &syncedAt, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("read skill %s: %w", r.EntityID, err)
+	}
+
+	m := map[string]any{
+		"id": id, "name": name, "slug": slug,
+		"description": description, "scope": scope,
+		"version": float64(version), "created_at": createdAt, "updated_at": updatedAt,
+	}
+	if teamID != "" {
+		m["team_id"] = teamID
+	}
+	if publicURL != "" {
+		m["public_url"] = publicURL
+	}
+	if icon != "" {
+		m["icon"] = icon
+	}
+	if color != "" {
+		m["color"] = color
+	}
+	if syncedAt != "" {
+		m["synced_at"] = syncedAt
+	}
+	setJSONArray(m, "stacks", stacksJSON)
+
+	meta, _ := structpb.NewStruct(m)
+	return &pluginv1.StorageReadResponse{Content: []byte(content), Metadata: meta, Version: version}, nil
+}
+
+func (s *StoragePlugin) readAgent(r routedPath) (*pluginv1.StorageReadResponse, error) {
+	var (
+		id, teamID, name, slug, description, content string
+		scope, publicURL, icon, color                string
+		version                                      int64
+		syncedAt, createdAt, updatedAt               string
+	)
+	err := s.db.QueryRow(`SELECT id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, version, synced_at, created_at, updated_at
+		FROM agents WHERE id = ?`, r.EntityID).Scan(
+		&id, &teamID, &name, &slug, &description, &content,
+		&scope, &publicURL, &icon, &color, &version, &syncedAt, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("read agent %s: %w", r.EntityID, err)
+	}
+
+	m := map[string]any{
+		"id": id, "name": name, "slug": slug,
+		"description": description, "scope": scope,
+		"version": float64(version), "created_at": createdAt, "updated_at": updatedAt,
+	}
+	if teamID != "" {
+		m["team_id"] = teamID
+	}
+	if publicURL != "" {
+		m["public_url"] = publicURL
+	}
+	if icon != "" {
+		m["icon"] = icon
+	}
+	if color != "" {
+		m["color"] = color
+	}
+	if syncedAt != "" {
+		m["synced_at"] = syncedAt
+	}
+
+	meta, _ := structpb.NewStruct(m)
+	return &pluginv1.StorageReadResponse{Content: []byte(content), Metadata: meta, Version: version}, nil
 }
 
 func (s *StoragePlugin) readKV(r routedPath) (*pluginv1.StorageReadResponse, error) {

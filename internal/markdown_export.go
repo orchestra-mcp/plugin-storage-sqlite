@@ -2,112 +2,242 @@ package internal
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"google.golang.org/protobuf/types/known/structpb"
-	"gopkg.in/yaml.v3"
 )
 
 const projectsDir = ".projects"
 
-// exportMarkdown writes the YAML frontmatter + markdown body to .projects/
-// for git visibility. This is fire-and-forget — SQLite is source of truth.
-func (s *StoragePlugin) exportMarkdown(storagePath string, metadata *structpb.Struct, content []byte) {
-	filePath, err := resolveMarkdownPath(s.workspace, storagePath)
+// ExportToMarkdown exports all SQLite data to .projects/ as markdown files.
+// This is an on-demand operation triggered by explicit user request.
+func ExportToMarkdown(workspace string) (int, error) {
+	dbPath := DBPath(workspace)
+	db, err := OpenDB(dbPath)
 	if err != nil {
-		log.Printf("[storage-sqlite] export skip: %v", err)
-		return
+		return 0, fmt.Errorf("open database: %w", err)
 	}
 
-	data, err := formatMarkdownFile(metadata, content)
-	if err != nil {
-		log.Printf("[storage-sqlite] export format error: %v", err)
-		return
+	exported := 0
+
+	// Export each entity type.
+	type exportSpec struct {
+		table string
+		dir   func(projectID string) string
+		query string
 	}
 
-	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		log.Printf("[storage-sqlite] export mkdir error: %v", err)
-		return
+	specs := []exportSpec{
+		{"features", func(pid string) string { return filepath.Join(pid, "features") },
+			`SELECT id, project_id, title, body, status, priority, kind, assignee, estimate FROM features`},
+		{"persons", func(pid string) string { return filepath.Join(pid, "persons") },
+			`SELECT id, project_id, name, body, role, status, '', '', '' FROM persons`},
+		{"plans", func(pid string) string { return filepath.Join(pid, "plans") },
+			`SELECT id, project_id, title, body, status, '', '', '', '' FROM plans`},
+		{"requests", func(pid string) string { return filepath.Join(pid, "requests") },
+			`SELECT id, project_id, title, body, status, priority, kind, '', '' FROM requests`},
+		{"delegations", func(pid string) string { return filepath.Join(pid, "delegations") },
+			`SELECT id, project_id, question, body, status, feature_id, to_person, from_person, responded_at FROM delegations`},
+		{"notes", func(_ string) string { return ".notes" },
+			`SELECT id, '', title, body, '', '', '', '', '' FROM notes`},
+		{"docs", func(pid string) string { return filepath.Join(pid, "docs") },
+			`SELECT id, project_id, title, body, category, '', '', '', '' FROM docs`},
+		{"skills", func(_ string) string { return ".skills" },
+			`SELECT slug, '', name, '', description, scope, '', '', '' FROM skills`},
+		{"agents", func(_ string) string { return ".agents" },
+			`SELECT slug, '', name, '', description, scope, '', '', '' FROM agents`},
 	}
 
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		log.Printf("[storage-sqlite] export write error: %v", err)
-		return
+	for _, spec := range specs {
+		n, err := exportTable(db, workspace, spec.table, spec.dir, spec.query)
+		if err != nil {
+			log.Printf("[export] skip %s: %v", spec.table, err)
+			continue
+		}
+		exported += n
 	}
 
-	// Write version sidecar for compatibility with markdown plugin.
-	// (Version is already in SQLite, but sidecar keeps .projects/ self-consistent.)
+	// Export projects as project.json.
+	rows, err := db.Query(`SELECT slug, name FROM projects`)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var slug, name string
+			if rows.Scan(&slug, &name) != nil {
+				continue
+			}
+			projDir := filepath.Join(workspace, projectsDir, slug)
+			os.MkdirAll(projDir, 0755)
+			projJSON := fmt.Sprintf(`{"slug":%q,"name":%q}`, slug, name)
+			if os.WriteFile(filepath.Join(projDir, "project.json"), []byte(projJSON), 0644) == nil {
+				exported++
+			}
+		}
+	}
+
+	return exported, nil
 }
 
-// deleteMarkdown removes the markdown file and version sidecar from .projects/.
-func (s *StoragePlugin) deleteMarkdown(storagePath string) {
-	filePath, err := resolveMarkdownPath(s.workspace, storagePath)
+func exportTable(db *sql.DB, workspace, table string, dirFunc func(string) string, query string) (int, error) {
+	rows, err := db.Query(query)
 	if err != nil {
-		return
+		return 0, err
 	}
-	os.Remove(filePath)
-	os.Remove(filePath + ".version")
-}
+	defer rows.Close()
 
-func resolveMarkdownPath(workspace, storagePath string) (string, error) {
-	if storagePath == "" {
-		return "", fmt.Errorf("empty path")
-	}
-	cleaned := filepath.Clean(storagePath)
-	if strings.Contains(cleaned, "..") {
-		return "", fmt.Errorf("path traversal: %q", storagePath)
-	}
-	return filepath.Join(workspace, projectsDir, cleaned), nil
-}
+	exported := 0
+	for rows.Next() {
+		var id, projectID, name, body, f1, f2, f3, f4, f5 string
+		if err := rows.Scan(&id, &projectID, &name, &body, &f1, &f2, &f3, &f4, &f5); err != nil {
+			continue
+		}
 
-func formatMarkdownFile(metadata *structpb.Struct, body []byte) ([]byte, error) {
-	var buf bytes.Buffer
+		dir := dirFunc(projectID)
+		outDir := filepath.Join(workspace, projectsDir, dir)
+		os.MkdirAll(outDir, 0755)
 
-	if metadata != nil && len(metadata.Fields) > 0 {
-		m := metadata.AsMap()
+		// Build frontmatter.
+		meta := make(map[string]string)
+		meta["id"] = id
+		entityType := strings.TrimSuffix(table, "s")
+		meta["type"] = entityType
 
-		keys := make([]string, 0, len(m))
-		for k := range m {
+		switch table {
+		case "features":
+			if name != "" {
+				meta["title"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["status"] = f1
+			}
+			if f2 != "" {
+				meta["priority"] = f2
+			}
+			if f3 != "" {
+				meta["kind"] = f3
+			}
+			if f4 != "" {
+				meta["assignee"] = f4
+			}
+			if f5 != "" {
+				meta["estimate"] = f5
+			}
+		case "persons":
+			if name != "" {
+				meta["name"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["role"] = f1
+			}
+			if f2 != "" {
+				meta["status"] = f2
+			}
+		case "plans":
+			if name != "" {
+				meta["title"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["status"] = f1
+			}
+		case "requests":
+			if name != "" {
+				meta["title"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["status"] = f1
+			}
+			if f2 != "" {
+				meta["priority"] = f2
+			}
+			if f3 != "" {
+				meta["kind"] = f3
+			}
+		case "delegations":
+			if name != "" {
+				meta["question"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["status"] = f1
+			}
+			if f2 != "" {
+				meta["feature_id"] = f2
+			}
+			if f3 != "" {
+				meta["to_person"] = f3
+			}
+			if f4 != "" {
+				meta["from_person"] = f4
+			}
+			if f5 != "" {
+				meta["responded_at"] = f5
+			}
+		case "notes":
+			if name != "" {
+				meta["title"] = name
+			}
+		case "docs":
+			if name != "" {
+				meta["title"] = name
+			}
+			if projectID != "" {
+				meta["project_slug"] = projectID
+			}
+			if f1 != "" {
+				meta["category"] = f1
+			}
+		case "skills", "agents":
+			if name != "" {
+				meta["name"] = name
+			}
+			if f1 != "" {
+				meta["description"] = f1
+			}
+			if f2 != "" {
+				meta["scope"] = f2
+			}
+		}
+
+		var buf bytes.Buffer
+		buf.WriteString("---\n")
+		keys := make([]string, 0, len(meta))
+		for k := range meta {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
-
-		sortedMap := &yamlOrderedMap{keys: keys, m: m}
-		yamlBytes, err := yaml.Marshal(sortedMap)
-		if err != nil {
-			return nil, fmt.Errorf("marshal YAML: %w", err)
+		for _, k := range keys {
+			buf.WriteString(k)
+			buf.WriteString(": ")
+			buf.WriteString(meta[k])
+			buf.WriteByte('\n')
 		}
+		buf.WriteString("---\n\n")
+		buf.WriteString(body)
 
-		buf.WriteString("---\n")
-		buf.Write(yamlBytes)
-		buf.WriteString("---\n")
-		buf.WriteString("\n")
-	}
-
-	buf.Write(body)
-	return buf.Bytes(), nil
-}
-
-type yamlOrderedMap struct {
-	keys []string
-	m    map[string]any
-}
-
-func (o *yamlOrderedMap) MarshalYAML() (any, error) {
-	node := &yaml.Node{Kind: yaml.MappingNode}
-	for _, k := range o.keys {
-		keyNode := &yaml.Node{Kind: yaml.ScalarNode, Value: k}
-		valNode := &yaml.Node{}
-		if err := valNode.Encode(o.m[k]); err != nil {
-			return nil, err
+		filename := id + ".md"
+		if err := os.WriteFile(filepath.Join(outDir, filename), buf.Bytes(), 0644); err != nil {
+			continue
 		}
-		node.Content = append(node.Content, keyNode, valNode)
+		exported++
 	}
-	return node, nil
+	return exported, nil
 }
+

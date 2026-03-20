@@ -22,7 +22,12 @@ const (
 	entitySessionTurn
 	entityPack
 	entityStack
-	entityHookEvent
+	entityDelegation
+	entityDoc
+	entitySkill
+	entityAgent
+	entityProjectSkill
+	entityProjectAgent
 	entityKV // fallback key-value store
 )
 
@@ -51,7 +56,6 @@ type routedPath struct {
 //	"bridge/sessions/<uuid>.md"                   → sessions
 //	"bridge/sessions/<uuid>/turn-001.md"          → session_turns
 //	".packs/registry.json"                        → packs (special)
-//	".events/hook-events.toon"                    → hook_events
 //	".stacks/stacks.json"                         → stacks
 func routePath(storagePath string) routedPath {
 	// Normalize: strip leading/trailing slashes, clean path.
@@ -72,13 +76,23 @@ func routePath(storagePath string) routedPath {
 		result.Entity = entityPack
 		result.Table = "packs"
 		return result
-	case parts[0] == ".events":
-		result.Entity = entityHookEvent
-		result.Table = "hook_events"
-		return result
 	case parts[0] == ".stacks":
 		result.Entity = entityStack
 		result.Table = "stacks"
+		return result
+	case parts[0] == ".skills":
+		result.Entity = entitySkill
+		result.Table = "skills"
+		if len(parts) >= 2 {
+			result.EntityID = stripExt(parts[1])
+		}
+		return result
+	case parts[0] == ".agents":
+		result.Entity = entityAgent
+		result.Table = "agents"
+		if len(parts) >= 2 {
+			result.EntityID = stripExt(parts[1])
+		}
 		return result
 	}
 
@@ -142,6 +156,10 @@ func routePath(storagePath string) routedPath {
 			result.Entity = entityRequest
 			result.Table = "requests"
 			return result
+		case "delegations":
+			result.Entity = entityDelegation
+			result.Table = "delegations"
+			return result
 		case "assignment-rules":
 			result.Entity = entityAssignmentRule
 			result.Table = "assignment_rules"
@@ -149,6 +167,10 @@ func routePath(storagePath string) routedPath {
 		case "notes":
 			result.Entity = entityNote
 			result.Table = "notes"
+			return result
+		case "docs":
+			result.Entity = entityDoc
+			result.Table = "docs"
 			return result
 		}
 	}
@@ -181,10 +203,12 @@ func isListPrefix(prefix string) (entityType, string) {
 	switch {
 	case parts[0] == ".packs":
 		return entityPack, ""
-	case parts[0] == ".events":
-		return entityHookEvent, ""
 	case parts[0] == ".stacks":
 		return entityStack, ""
+	case parts[0] == ".skills":
+		return entitySkill, ""
+	case parts[0] == ".agents":
+		return entityAgent, ""
 	case parts[0] == "bridge" && len(parts) >= 2 && parts[1] == "sessions":
 		if len(parts) == 3 {
 			// bridge/sessions/<id>/ — list turns
@@ -204,10 +228,14 @@ func isListPrefix(prefix string) (entityType, string) {
 			return entityPlan, projectID
 		case "requests":
 			return entityRequest, projectID
+		case "delegations":
+			return entityDelegation, projectID
 		case "assignment-rules":
 			return entityAssignmentRule, projectID
 		case "notes":
 			return entityNote, projectID
+		case "docs":
+			return entityDoc, projectID
 		}
 	}
 

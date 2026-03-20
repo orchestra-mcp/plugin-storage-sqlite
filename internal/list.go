@@ -24,6 +24,11 @@ func (s *StoragePlugin) List(_ context.Context, req *pluginv1.StorageListRequest
 		return s.listAllProjects()
 	}
 
+	// Root prefix with *.md pattern → aggregate all .md entities across all projects.
+	if cleanPrefix == "." && req.Pattern == "*.md" {
+		return s.listAllEntities()
+	}
+
 	entity, projectID := isListPrefix(prefix)
 
 	switch entity {
@@ -35,6 +40,8 @@ func (s *StoragePlugin) List(_ context.Context, req *pluginv1.StorageListRequest
 		return s.listPlans(projectID)
 	case entityRequest:
 		return s.listRequests(projectID)
+	case entityDelegation:
+		return s.listDelegations(projectID)
 	case entityAssignmentRule:
 		return s.listAssignmentRules(projectID)
 	case entityNote:
@@ -45,8 +52,12 @@ func (s *StoragePlugin) List(_ context.Context, req *pluginv1.StorageListRequest
 		return s.listSessionTurns(projectID) // projectID is sessionID here
 	case entityPack:
 		return s.listPacks()
-	case entityHookEvent:
-		return s.listHookEvents()
+	case entityDoc:
+		return s.listDocs(projectID)
+	case entitySkill:
+		return s.listSkills()
+	case entityAgent:
+		return s.listAgents()
 	default:
 		return s.listKV(prefix, req.Pattern)
 	}
@@ -60,6 +71,105 @@ func (s *StoragePlugin) listAllProjects() (*pluginv1.StorageListResponse, error)
 	return scanEntries(rows, func(slug, _ string) string {
 		return filepath.Join(slug, "project.json")
 	})
+}
+
+// listAllEntities aggregates all .md entity rows across all projects.
+// This is called when the sync engine does List(prefix="", pattern="*.md")
+// to discover all entities for push.
+func (s *StoragePlugin) listAllEntities() (*pluginv1.StorageListResponse, error) {
+	var allEntries []*pluginv1.StorageEntry
+
+	// Each query selects (id, project_id, version, updated_at) and uses a path builder.
+	type entityQuery struct {
+		query    string
+		pathFunc func(id, pid string) string
+	}
+
+	queries := []entityQuery{
+		{
+			query: `SELECT id, project_id, version, updated_at FROM features`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "features", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM persons`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "persons", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM plans`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "plans", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM requests`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "requests", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM delegations`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "delegations", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM assignment_rules`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "assignment-rules", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM notes WHERE deleted = 0`,
+			pathFunc: func(id, pid string) string {
+				if pid == "" {
+					pid = ".global"
+				}
+				return filepath.Join(pid, "notes", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, project_id, version, updated_at FROM docs`,
+			pathFunc: func(id, pid string) string {
+				return filepath.Join(pid, "docs", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, '' AS project_id, version, updated_at FROM skills`,
+			pathFunc: func(id, _ string) string {
+				return filepath.Join(".skills", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, '' AS project_id, version, updated_at FROM agents`,
+			pathFunc: func(id, _ string) string {
+				return filepath.Join(".agents", id+".md")
+			},
+		},
+		{
+			query: `SELECT id, '' AS project_id, 0 AS version, created_at AS updated_at FROM sessions`,
+			pathFunc: func(id, _ string) string {
+				return filepath.Join("bridge", "sessions", id+".md")
+			},
+		},
+	}
+
+	for _, eq := range queries {
+		rows, err := s.db.Query(eq.query)
+		if err != nil {
+			continue // table may not exist yet
+		}
+		resp, err := scanEntries(rows, eq.pathFunc)
+		if err != nil {
+			continue
+		}
+		allEntries = append(allEntries, resp.Entries...)
+	}
+
+	return &pluginv1.StorageListResponse{Entries: allEntries}, nil
 }
 
 func (s *StoragePlugin) listFeatures(projectID string) (*pluginv1.StorageListResponse, error) {
@@ -99,6 +209,16 @@ func (s *StoragePlugin) listRequests(projectID string) (*pluginv1.StorageListRes
 	}
 	return scanEntries(rows, func(id, pid string) string {
 		return filepath.Join(pid, "requests", id+".md")
+	})
+}
+
+func (s *StoragePlugin) listDelegations(projectID string) (*pluginv1.StorageListResponse, error) {
+	rows, err := s.db.Query(`SELECT id, project_id, version, updated_at FROM delegations WHERE project_id = ?`, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("list delegations: %w", err)
+	}
+	return scanEntries(rows, func(id, pid string) string {
+		return filepath.Join(pid, "delegations", id+".md")
 	})
 }
 
@@ -167,18 +287,34 @@ func (s *StoragePlugin) listPacks() (*pluginv1.StorageListResponse, error) {
 	})
 }
 
-func (s *StoragePlugin) listHookEvents() (*pluginv1.StorageListResponse, error) {
-	// Hook events are append-only, just return the single file entry.
-	var count int64
-	s.db.QueryRow(`SELECT COUNT(*) FROM hook_events`).Scan(&count)
+func (s *StoragePlugin) listDocs(projectID string) (*pluginv1.StorageListResponse, error) {
+	rows, err := s.db.Query(`SELECT id, project_id, version, updated_at FROM docs WHERE project_id = ?`, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("list docs: %w", err)
+	}
+	return scanEntries(rows, func(id, pid string) string {
+		return filepath.Join(pid, "docs", id+".md")
+	})
+}
 
-	entries := []*pluginv1.StorageEntry{{
-		Path:       ".events/hook-events.toon",
-		Size:       count,
-		Version:    0,
-		ModifiedAt: timestamppb.Now(),
-	}}
-	return &pluginv1.StorageListResponse{Entries: entries}, nil
+func (s *StoragePlugin) listSkills() (*pluginv1.StorageListResponse, error) {
+	rows, err := s.db.Query(`SELECT id, '' AS project_id, version, updated_at FROM skills`)
+	if err != nil {
+		return nil, fmt.Errorf("list skills: %w", err)
+	}
+	return scanEntries(rows, func(id, _ string) string {
+		return filepath.Join(".skills", id+".md")
+	})
+}
+
+func (s *StoragePlugin) listAgents() (*pluginv1.StorageListResponse, error) {
+	rows, err := s.db.Query(`SELECT id, '' AS project_id, version, updated_at FROM agents`)
+	if err != nil {
+		return nil, fmt.Errorf("list agents: %w", err)
+	}
+	return scanEntries(rows, func(id, _ string) string {
+		return filepath.Join(".agents", id+".md")
+	})
 }
 
 func (s *StoragePlugin) listKV(prefix, pattern string) (*pluginv1.StorageListResponse, error) {

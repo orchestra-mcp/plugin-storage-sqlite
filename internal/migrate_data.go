@@ -80,6 +80,8 @@ func MigrateFromMarkdown(db *sql.DB, workspace string) error {
 			err = migratePlan(tx, route, meta, body)
 		case entityRequest:
 			err = migrateRequest(tx, route, meta, body)
+		case entityDelegation:
+			err = migrateDelegation(tx, route, meta, body)
 		case entityAssignmentRule:
 			err = migrateAssignmentRule(tx, route, meta, body)
 		case entityNote:
@@ -92,7 +94,13 @@ func MigrateFromMarkdown(db *sql.DB, workspace string) error {
 			err = migrateSession(tx, route, meta, body)
 		case entitySessionTurn:
 			err = migrateSessionTurn(tx, route, meta, body)
-		default:
+		case entityDoc:
+			err = migrateDoc(tx, route, meta, body)
+		case entitySkill:
+			err = migrateSkill(tx, route, meta, body)
+		case entityAgent:
+			err = migrateAgent(tx, route, meta, body)
+			default:
 			err = migrateKV(tx, relPath, data, meta)
 		}
 
@@ -170,6 +178,20 @@ func migrateRequest(tx *sql.Tx, r routedPath, meta *structpb.Struct, body []byte
 		r.EntityID, str(m, "project_id"), str(m, "title"), str(m, "description"),
 		strDef(m, "kind", "feature"), strDef(m, "status", "pending"),
 		strDef(m, "priority", "P2"), string(body), intVal(m, "version"),
+		strDef(m, "created_at", "2024-01-01T00:00:00Z"), strDef(m, "updated_at", "2024-01-01T00:00:00Z"))
+	return err
+}
+
+func migrateDelegation(tx *sql.Tx, r routedPath, meta *structpb.Struct, body []byte) error {
+	m := metaMap(meta)
+	_, err := tx.Exec(`INSERT OR IGNORE INTO delegations (id, project_id, feature_id, from_person, to_person, question,
+		context, response, status, responded_at, body, version, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		r.EntityID, str(m, "project_id"), str(m, "feature_id"), str(m, "from_person"),
+		str(m, "to_person"), str(m, "question"),
+		str(m, "context"), str(m, "response"),
+		strDef(m, "status", "pending"), str(m, "responded_at"),
+		string(body), intVal(m, "version"),
 		strDef(m, "created_at", "2024-01-01T00:00:00Z"), strDef(m, "updated_at", "2024-01-01T00:00:00Z"))
 	return err
 }
@@ -272,6 +294,51 @@ func migrateKV(tx *sql.Tx, path string, data []byte, meta *structpb.Struct) erro
 	_, err := tx.Exec(`INSERT OR IGNORE INTO kv_store (path, content, metadata, version, created_at, updated_at)
 		VALUES (?, ?, ?, 1, datetime('now'), datetime('now'))`,
 		path, data, metaJSON)
+	return err
+}
+
+func migrateDoc(tx *sql.Tx, r routedPath, meta *structpb.Struct, body []byte) error {
+	m := metaMap(meta)
+	published := 0
+	if boolVal(m, "published") {
+		published = 1
+	}
+	_, err := tx.Exec(`INSERT OR IGNORE INTO docs (id, project_id, title, slug, body, parent_id, position,
+		published, published_at, tags, version, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		r.EntityID, str(m, "project_id"), str(m, "title"), str(m, "slug"),
+		string(body), str(m, "parent_id"), intVal(m, "position"),
+		published, str(m, "published_at"), jsonArr(m, "tags"),
+		intVal(m, "version"),
+		strDef(m, "created_at", "2024-01-01T00:00:00Z"), strDef(m, "updated_at", "2024-01-01T00:00:00Z"))
+	return err
+}
+
+func migrateSkill(tx *sql.Tx, r routedPath, meta *structpb.Struct, body []byte) error {
+	m := metaMap(meta)
+	_, err := tx.Exec(`INSERT OR IGNORE INTO skills (id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, stacks, version, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		r.EntityID, str(m, "team_id"), str(m, "name"), str(m, "slug"),
+		str(m, "description"), string(body),
+		strDef(m, "scope", "personal"), str(m, "public_url"),
+		str(m, "icon"), str(m, "color"), jsonArr(m, "stacks"),
+		intVal(m, "version"),
+		strDef(m, "created_at", "2024-01-01T00:00:00Z"), strDef(m, "updated_at", "2024-01-01T00:00:00Z"))
+	return err
+}
+
+func migrateAgent(tx *sql.Tx, r routedPath, meta *structpb.Struct, body []byte) error {
+	m := metaMap(meta)
+	_, err := tx.Exec(`INSERT OR IGNORE INTO agents (id, team_id, name, slug, description, content,
+		scope, public_url, icon, color, version, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		r.EntityID, str(m, "team_id"), str(m, "name"), str(m, "slug"),
+		str(m, "description"), string(body),
+		strDef(m, "scope", "personal"), str(m, "public_url"),
+		str(m, "icon"), str(m, "color"),
+		intVal(m, "version"),
+		strDef(m, "created_at", "2024-01-01T00:00:00Z"), strDef(m, "updated_at", "2024-01-01T00:00:00Z"))
 	return err
 }
 
